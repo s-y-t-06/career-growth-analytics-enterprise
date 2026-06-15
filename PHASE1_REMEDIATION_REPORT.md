@@ -246,7 +246,7 @@ SRM p-value: 0.6677 (no sample-ratio mismatch detected).
 Commit after remediation:
 
 ```text
-3d8313c Phase 1 remediation: reproducibility, retention, SRM, interventions, realism, docs, cleanup
+157acdf Phase 1 remediation: reproducibility, retention, SRM, interventions, realism, docs, cleanup
 ```
 
 ## 7. Remaining risks and limitations
