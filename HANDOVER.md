@@ -14,7 +14,11 @@
 
 ## 2. 当前 git 状态
 
-待 Phase 2 提交后更新为最新 commit hash。工作目录干净，无未提交修改。
+`	ext
+b32666a feat: Phase 2 churn prediction with LR baseline and HistGradientBoosting
+`
+
+工作目录干净，无未提交修改。
 
 ## 3. 已完成的整改内容（Phase 1 Remediation）
 
