@@ -14,8 +14,8 @@
 ## 2. 当前 git 状态
 
 ```text
-最终 HEAD: 39f49d7 docs: record final remediation commit hash in report
 主要整改 commit: 157acdf Phase 1 remediation: reproducibility, retention, SRM, interventions, realism, docs, cleanup
+当前 HEAD 请执行 git log --oneline 查看
 更早提交: 74bc006, 95d1780
 ```
 
