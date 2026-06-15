@@ -6,7 +6,7 @@
 - **项目阶段**：Phase 1 最终整改已完成，等待 Codex 最终验收
 - **任务类型**：最终整改（环境修复 + 注释恢复英文）
 - **执行环境**：Windows PowerShell
-- **真实基础 Python**：`C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows_x86_64-none\python.exe`
+- **真实基础 Python**：`C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows-x86_64-none\python.exe`
 - **项目虚拟环境**：`C:\Users\Administrator\Desktop\career-growth-analytics\.venv\Scripts\python.exe`
 
 ## 本次目标
@@ -51,31 +51,33 @@ Installed Python 3.11.15 in 1m 29s
 真实解释器路径：
 
 ```text
-C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows_x86_64-none\python.exe
+C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows-x86_64-none\python.exe
 ```
 
 验证：
 
 ```powershell
-C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows_x86_64-none\python.exe --version
+C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows-x86_64-none\python.exe --version
 # Python 3.11.15
 ```
 
 ### 3. 重新创建 .venv
 
+> 前提：Windows 上需预先安装 CPython 3.11，使 `py -3.11` 可用。本环境通过 `uv python install 3.11` 完成安装。
+
 ```powershell
 Remove-Item -Recurse -Force .venv
-C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows_x86_64-none\python.exe -m venv .venv
+py -3.11 -m venv .venv
 ```
 
 新的 `.venv/pyvenv.cfg`：
 
 ```text
-home = C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows_x86_64-none
+home = C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows-x86_64-none
 include-system-site-packages = false
 version = 3.11.15
-executable = C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows_x86_64-none\python.exe
-command = C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows_x86_64-none\python.exe -m venv C:\Users\Administrator\Desktop\career-growth-analytics\.venv
+executable = C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows-x86_64-none\python.exe
+command = C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows-x86_64-none\python.exe -m venv C:\Users\Administrator\Desktop\career-growth-analytics\.venv
 ```
 
 ### 4. 安装依赖
@@ -253,7 +255,7 @@ tests\test_validation.py ....
 
 ## 关键结果
 
-- 真实基础 Python 路径：`C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows_x86_64-none\python.exe`
+- 真实基础 Python 路径：`C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows-x86_64-none\python.exe`
 - `.venv` Python 路径：`C:\Users\Administrator\Desktop\career-growth-analytics\.venv\Scripts\python.exe`
 - 测试：29 passed
 - 非 ASCII 扫描：0 occurrences

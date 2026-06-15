@@ -15,11 +15,12 @@
 ## 2. 当前 git 状态
 
 ```text
+5303438 fix: use real CPython 3.11.15 for .venv and restore English comments
 157acdf Phase 1 remediation: reproducibility, retention, SRM, interventions, realism, docs, cleanup
 74bc006 Phase 1 MVP final: add executed notebook, docs and scripts
 ```
 
-当前工作目录有未提交修改：README.md、HANDOVER.md、PHASE1_REMEDIATION_REPORT.md、源码注释恢复英文、__init__.py 文件清理。本次任务完成后将统一提交。
+工作目录干净，无未提交修改。
 
 ## 3. 已完成的整改内容（Phase 1 Remediation）
 
@@ -61,7 +62,7 @@ ONBOARDING_VARIANTS = [
 
 ### 当前 Python 环境
 
-- 真实基础解释器：`C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows_x86_64-none\python.exe`（通过 `uv` 安装的 CPython 3.11.15）
+- 真实基础解释器：`C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows-x86_64-none\python.exe`（通过 `uv` 安装的 CPython 3.11.15）
 - 项目虚拟环境解释器：`.venv\Scripts\python.exe`
 - 解释器版本：Python 3.11.15
 - 依赖安装方式：`.venv\Scripts\python.exe -m pip install -e ".[dev]"`
@@ -205,8 +206,8 @@ tests\test_validation.py ....
 # 进入项目目录
 cd C:\Users\Administrator\Desktop\career-growth-analytics
 
-# 创建并激活本地虚拟环境（首次）
-python -m venv .venv
+# 创建并激活本地虚拟环境（首次；需预先安装 CPython 3.11）
+py -3.11 -m venv .venv
 .venv\Scripts\activate
 
 # 安装依赖（每次 pyproject.toml 变更后）

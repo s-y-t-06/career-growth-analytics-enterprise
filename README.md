@@ -85,10 +85,12 @@ No external APIs, payment gateways, or cloud services are used. All data is gene
 
 ## Installation
 
-Create and activate a virtual environment in the repository root using a real CPython interpreter (not a Windows Store alias), then install the package in editable mode:
+Create and activate a virtual environment in the repository root using a real CPython interpreter (not a Windows Store alias), then install the package in editable mode.
+
+On Windows, use the `py` launcher with CPython 3.11 preinstalled:
 
 ```powershell
-C:\Path\To\Real\python.exe -m venv .venv
+py -3.11 -m venv .venv
 .venv\Scripts\activate
 .venv\Scripts\python.exe -m pip install -e ".[dev]"
 ```
@@ -103,7 +105,7 @@ source .venv/bin/activate
 
 The `.venv/` directory is ignored by Git (see `.gitignore`). Using the virtual environment's interpreter avoids relying on the Windows Store Python shim, which cannot be invoked by absolute path in a fresh terminal.
 
-Verified base interpreter for this repository:
+Verified base interpreter for this repository (CPython 3.11.15 installed via `uv`):
 
 ```text
 C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows-x86_64-none\python.exe

@@ -5,7 +5,7 @@
 Base interpreter used to create the virtual environment:
 
 ```text
-C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows_x86_64-none\python.exe
+C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows-x86_64-none\python.exe
 ```
 
 Project virtual environment interpreter:
@@ -112,7 +112,7 @@ Create the virtual environment from a real CPython interpreter and install depen
 
 ```powershell
 cd C:\Users\Administrator\Desktop\career-growth-analytics
-C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows_x86_64-none\python.exe -m venv .venv
+py -3.11 -m venv .venv
 .venv\Scripts\activate
 .venv\Scripts\python.exe -m pip install -e ".[dev]"
 ```
