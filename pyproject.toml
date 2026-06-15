@@ -38,6 +38,7 @@ dev = [
     "pytest-cov>=4.1.0",
     "jupyter>=1.0.0",
     "notebook>=7.0.0",
+    "nbconvert>=7.0.0",
     "ipython>=8.14.0",
 ]
 
