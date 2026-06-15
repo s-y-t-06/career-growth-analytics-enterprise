@@ -53,6 +53,7 @@ Thumbs.db
 data_tmp_grid/
 data_test_*/
 *.log
+artifacts/
 
 # Local secrets
 .env

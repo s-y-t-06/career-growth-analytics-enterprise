@@ -8,19 +8,13 @@
 - **MVP 仓库**：`C:\Users\Administrator\Desktop\career-growth-analytics`
 - **项目名**：Career Growth Analytics
 - **业务场景**：AI Career Platform 用户生命周期增长与实验优化系统
-- **当前阶段**：Phase 1 最终整改已完成，等待 Codex 最终验收
-- **严格约束**：**不得开始 Phase 2（模型训练、API、数据库、前端开发）**，必须等 Codex 审批
+- **当前阶段**：Phase 2 流失预测与模型评估已完成
+- **严格约束**：**不得开始 API、数据库、前端开发或 Enterprise 系统**，必须等 Codex 审批
 - **合规要求**：不得使用任何 lychas 相关代码、数据或命名
 
 ## 2. 当前 git 状态
 
-```text
-5303438 fix: use real CPython 3.11.15 for .venv and restore English comments
-157acdf Phase 1 remediation: reproducibility, retention, SRM, interventions, realism, docs, cleanup
-74bc006 Phase 1 MVP final: add executed notebook, docs and scripts
-```
-
-工作目录干净，无未提交修改。
+待 Phase 2 提交后更新为最新 commit hash。工作目录干净，无未提交修改。
 
 ## 3. 已完成的整改内容（Phase 1 Remediation）
 
@@ -76,24 +70,26 @@ $env:PYTHONPATH = "src"
 .venv\Scripts\python.exe -m pytest tests -q
 ```
 
-结果：
+结果（Phase 1 + Phase 2 共 44 项）：
 
-```text
+`	ext
 ============================= test session starts =============================
 platform win32 -- Python 3.11.15, pytest-9.1.0, pluggy-1.6.0
 rootdir: C:\Users\Administrator\Desktop\career-growth-analytics
 configfile: pyproject.toml
 testpaths: tests
-collected 29 items
+collected 44 items
 
-tests\test_analytics.py ...........
-tests\test_data_generation.py .........
+tests\test_analytics.py .........
+tests\test_data_generation.py ........
 tests\test_decisions.py ..
 tests\test_features.py ...
+tests\test_model_features.py ......
+tests\test_modeling.py .........
 tests\test_validation.py ....
 
-============================= 29 passed in 46.70s =============================
-```
+============================= 44 passed =============================
+`
 
 ### 当前数据状态
 
@@ -244,13 +240,15 @@ $env:PYTHONPATH = "src"
 | 配置 | `src/career_growth/config.py` |
 | Schema | `src/career_growth/schemas.py` |
 | 标签 | `src/career_growth/features/labels.py` |
+| 特征工程 | `src/career_growth/features/model_features.py` |
 | 校验 | `src/career_growth/validation/validator.py` |
 | 分析 | `src/career_growth/analytics/funnel.py`, `retention.py`, `experiments.py` |
+| 建模 | `src/career_growth/modeling/split.py`, `pipeline.py`, `evaluate.py`, `explain.py`, `train.py` |
 | 决策 | `src/career_growth/decisions/next_best_action.py` |
-| 测试 | `tests/test_data_generation.py`, `test_validation.py`, `test_analytics.py`, `test_features.py`, `test_decisions.py`, `tests/conftest.py` |
-| 脚本 | `scripts/generate_data.py`, `run_analysis.py`, `compute_summary.py`, `build_notebook.py` |
-| 文档 | `README.md`, `docs/data_schema.md`, `docs/methodology.md`, `pyproject.toml`, `.gitignore` |
-| 验收 | `PHASE1_REMEDIATION_REPORT.md`, `HANDOVER.md`（本文件） |
+| 测试 | `tests/test_data_generation.py`, `test_validation.py`, `test_analytics.py`, `test_features.py`, `test_decisions.py`, `test_model_features.py`, `test_modeling.py`, `tests/conftest.py` |
+| 脚本 | `scripts/generate_data.py`, `run_analysis.py`, `compute_summary.py`, `build_notebook.py`, `train_churn_model.py` |
+| 文档 | `README.md`, `docs/data_schema.md`, `docs/methodology.md`, `docs/model_card.md`, `pyproject.toml`, `.gitignore` |
+| 验收 | `PHASE1_REMEDIATION_REPORT.md`, `PHASE2_MODELING_REPORT.md`, `HANDOVER.md`（本文件） |
 
 ## 7. 尚未解决的风险
 
@@ -261,8 +259,8 @@ $env:PYTHONPATH = "src"
 
 ## 8. 下一步建议
 
-1. 等待 Codex 对 Phase 1 整改进行最终验收。
-2. 若 Codex 批准，则开始 Phase 2：Churn 预测模型（Logistic Regression baseline + HistGradientBoosting）、特征工程、模型评估、SHAP/校准、Enterprise API 兼容性准备。
+1. 等待 Codex 对 Phase 2 进行最终验收。
+2. 若 Codex 批准，则开始 Phase 3：Enterprise API 设计与实现、数据库存储、前端展示或生产部署准备。
 3. 若 Codex 提出新整改要求，继续按上述约束执行。
 
 ---

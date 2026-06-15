@@ -15,10 +15,11 @@ The MVP focuses on the core data and analytics pipeline:
 - A/B experiment analysis with sample ratio mismatch detection.
 - Churn label construction without data leakage.
 - Rule-based Next Best Action engine.
+- Churn prediction model training and evaluation (Phase 2).
 - Automated tests.
-- End-to-end Jupyter notebook.
+- End-to-end Jupyter notebooks.
 
-Model training is intentionally outside the scope of this MVP repository.
+Model training is now included as Phase 2: a reproducible churn prediction pipeline with feature engineering, chronological train/validation/test splits, model selection, and evaluation.
 
 ## Business Context
 
@@ -49,7 +50,8 @@ career-growth-analytics/
 │   ├── data_schema.md         # Full data schema
 │   └── methodology.md         # Generation and label methodology
 ├── notebooks/
-│   └── lifecycle_analysis.ipynb   # End-to-end exploratory analysis
+│   ├── lifecycle_analysis.ipynb   # End-to-end exploratory analysis
+│   └── churn_modeling.ipynb       # Churn prediction modeling
 ├── scripts/
 │   ├── generate_data.py       # CLI to regenerate synthetic data
 │   ├── run_analysis.py        # CLI to run validation and analytics
@@ -61,7 +63,8 @@ career-growth-analytics/
 │   ├── data_generation/       # Synthetic data generators
 │   ├── validation/            # Data quality validator
 │   ├── analytics/             # Funnel, retention, and experiment analysis
-│   ├── features/              # Label construction
+│   ├── features/              # Label construction and model feature engineering
+│   ├── modeling/              # Churn model training, evaluation, explainability
 │   └── decisions/             # Next Best Action rules
 ├── tests/                     # pytest suite
 ├── pyproject.toml
@@ -142,6 +145,28 @@ $env:PYTHONPATH = "src"
 ```
 
 This executes validation, funnel, retention, cohort, experiment, and Next Best Action analysis.
+
+## Train Churn Model
+
+Train and evaluate churn prediction models on the full 5,000-user dataset:
+
+```powershell
+$env:PYTHONPATH = "src"
+.venv\Scripts\python.exe scripts/train_churn_model.py --count 5000 --seed 42
+```
+
+This script:
+
+- Generates or loads synthetic data.
+- Builds pre-cutoff features and attaches churn labels.
+- Splits users chronologically into train/validation/test sets.
+- Trains a Logistic Regression baseline and a HistGradientBoostingClassifier.
+- Selects the best model by validation PR-AUC.
+- Chooses an operating threshold on the validation set (F1 by default).
+- Evaluates the selected model exactly once on the test set.
+- Saves the model, metadata, metrics, feature schema, explainability artifacts, and plots under `artifacts/`.
+
+To use existing data instead of regenerating it, add `--use-existing-data`.
 
 ## Run Tests
 
