@@ -1,0 +1,165 @@
+# Career Growth Analytics
+
+AI Career Platform Lifecycle Growth and Experimentation System — MVP.
+
+This repository contains the minimum viable product for analyzing user lifecycle growth in an AI-powered career planning and job recommendation product. It generates a realistic synthetic event stream, validates data quality, computes growth funnels and cohort retention, analyzes an onboarding A/B experiment, and produces rule-based Next Best Action recommendations.
+
+## Project Scope
+
+The MVP focuses on the core data and analytics pipeline:
+
+- Synthetic user and event data generation.
+- Data schema validation and quality checks.
+- Growth funnel analysis.
+- Cohort retention analysis.
+- A/B experiment analysis with sample ratio mismatch detection.
+- Churn label construction without data leakage.
+- Rule-based Next Best Action engine.
+- Automated tests.
+- End-to-end Jupyter notebook.
+
+Model training is intentionally outside the scope of this MVP repository.
+
+## Business Context
+
+The simulated product helps university students and early-career professionals explore career paths, upload resumes, receive job recommendations, complete growth tasks, and generate career reports. The growth platform measures and optimizes the user journey from signup through activation and retention.
+
+Core user journey:
+
+```
+signup
+→ onboarding_complete
+→ profile_complete
+→ resume_upload
+→ job_recommendation_view
+→ job_save
+→ growth_task_complete
+→ career_report_generate
+→ retained / churned
+```
+
+## Repository Structure
+
+```
+career-growth-analytics/
+├── data/
+│   ├── sample/                # Generated CSV files (users, events, experiments, interventions)
+│   └── processed/             # Derived outputs such as labels
+├── docs/
+│   ├── data_schema.md         # Full data schema
+│   └── methodology.md         # Generation and label methodology
+├── notebooks/
+│   └── lifecycle_analysis.ipynb   # End-to-end exploratory analysis
+├── scripts/
+│   ├── generate_data.py       # CLI to regenerate synthetic data
+│   └── run_analysis.py        # CLI to run validation and analytics
+├── src/career_growth/
+│   ├── config.py              # Project constants and experiment definitions
+│   ├── schemas.py             # Pydantic row-level schemas
+│   ├── data_generation/       # Synthetic data generators
+│   ├── validation/            # Data quality validator
+│   ├── analytics/             # Funnel, retention, and experiment analysis
+│   ├── features/              # Label construction
+│   └── decisions/             # Next Best Action rules
+├── tests/                     # pytest suite
+├── pyproject.toml
+├── README.md
+└── LICENSE
+```
+
+## Technology Stack
+
+- Python 3.10+
+- pandas
+- numpy
+- scikit-learn
+- scipy
+- matplotlib / seaborn
+- pydantic
+- pytest
+- Jupyter
+
+No external APIs, payment gateways, or cloud services are used. All data is generated locally.
+
+## Installation
+
+Create and activate a virtual environment, then install the package in editable mode:
+
+```bash
+python -m venv .venv
+# Windows
+.venv\Scripts\activate
+# macOS / Linux
+source .venv/bin/activate
+
+pip install -e ".[dev]"
+```
+
+## Generate Data
+
+To regenerate the synthetic dataset with the default 5,000 users and fixed seed:
+
+```bash
+python scripts/generate_data.py
+```
+
+To generate a different size:
+
+```bash
+python scripts/generate_data.py --count 1000 --seed 42
+```
+
+Generated files:
+
+- `data/sample/users.csv`
+- `data/sample/events.csv`
+- `data/sample/experiment_assignments.csv`
+- `data/sample/interventions.csv`
+- `data/processed/labels.csv`
+
+## Run Analytics
+
+After generating data, run the full analytics pipeline from the command line:
+
+```bash
+python scripts/run_analysis.py
+```
+
+This executes validation, funnel, retention, cohort, experiment, and Next Best Action analysis.
+
+## Run Tests
+
+```bash
+python -m pytest tests -q
+```
+
+## Open Notebook
+
+```bash
+jupyter notebook notebooks/lifecycle_analysis.ipynb
+```
+
+## Churn Label Definition
+
+- Prediction cutoff: signup timestamp + 7 days.
+- Label window: day 8 through day 21 after signup.
+- `is_churned = 1` if the user has no `event_source == "user_action"` events in the label window.
+- Only users with a complete 21-day observation window are included.
+
+## A/B Experiment
+
+`exp_onboarding_v1` compares three onboarding flows:
+
+- `control` — standard five-step onboarding (40%)
+- `personalized` — adaptive onboarding (30%)
+- `simplified` — two-step onboarding (30%)
+
+Primary metrics: onboarding completion rate, profile completion rate, D7 retention rate.
+
+## Design Decisions
+
+See `docs/methodology.md` for the full generative causal order, probability formulas, treatment effect injection, noise and anomaly injection, and leakage protection rules.
+
+## License
+
+MIT License — see `LICENSE`.
