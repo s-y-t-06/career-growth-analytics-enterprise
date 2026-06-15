@@ -1,4 +1,4 @@
-"""Data quality validation for synthetic datasets."""
+"""合成数据集的数据质量验证。"""
 
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -12,7 +12,7 @@ from career_growth import config, schemas
 
 @dataclass
 class ValidationReport:
-    """Container for validation results."""
+    """验证结果的容器。"""
 
     passed: bool = True
     errors: list[str] = field(default_factory=list)
@@ -36,7 +36,7 @@ class ValidationReport:
 
 
 class DataValidator:
-    """Validate the synthetic MVP dataset against the defined schema and rules."""
+    """根据已定义的模式与规则验证合成 MVP 数据集。"""
 
     def __init__(self, data_dir: str = "data") -> None:
         self.data_dir = data_dir
@@ -73,7 +73,7 @@ class DataValidator:
         return report
 
     def _validate_schema(self, report: ValidationReport) -> None:
-        # Required columns.
+        # 必填列。
         required_user_cols = {
             "user_id",
             "signup_timestamp",
@@ -110,7 +110,7 @@ class DataValidator:
         else:
             report.checks["events_columns"] = True
 
-        # Categorical value checks.
+        # 分类取值检查。
         invalid_channels = set(self.users["acquisition_channel"]) - set(config.ACQUISITION_CHANNELS)
         if invalid_channels:
             report.add_error(f"Invalid acquisition_channel values: {invalid_channels}")
@@ -127,21 +127,21 @@ class DataValidator:
         if invalid_sources:
             report.add_error(f"Invalid event_source values: {invalid_sources}")
 
-        # Duplicate event IDs.
+        # 重复事件 ID。
         dup_events = self.events["event_id"].duplicated().sum()
         if dup_events > 0:
             report.add_error(f"Found {dup_events} duplicate event_id values")
         else:
             report.checks["unique_event_ids"] = True
 
-        # Duplicate user IDs.
+        # 重复用户 ID。
         dup_users = self.users["user_id"].duplicated().sum()
         if dup_users > 0:
             report.add_error(f"Found {dup_users} duplicate user_id values")
         else:
             report.checks["unique_user_ids"] = True
 
-        # Row-level Pydantic validation on a sample to catch subtle type issues.
+        # 对样本进行行级 Pydantic 验证，以发现细微的类型问题。
         sample_size = min(100, len(self.users))
         for _, row in self.users.head(sample_size).iterrows():
             try:
@@ -176,7 +176,7 @@ class DataValidator:
             report.add_error(f"Users missing experiment assignment: {len(missing_assignments)}")
 
     def _validate_temporal_rules(self, report: ValidationReport) -> None:
-        # Every event timestamp must be >= signup timestamp.
+        # 每个事件时间戳必须 >= 注册时间戳。
         merged = self.events.merge(self.users[["user_id", "signup_timestamp"]], on="user_id")
         invalid_time = (merged["event_timestamp"] < merged["signup_timestamp"]).sum()
         if invalid_time > 0:
@@ -184,7 +184,7 @@ class DataValidator:
         else:
             report.checks["event_after_signup"] = True
 
-        # Users must have complete observation window.
+        # 用户必须拥有完整的观察窗口。
         max_signup = self.users["signup_timestamp"].max()
         required_freeze = max_signup + pd.Timedelta(days=config.LABEL_WINDOW_END_DAY)
         if required_freeze > config.END_DATE:
@@ -194,7 +194,7 @@ class DataValidator:
         else:
             report.checks["observation_window"] = True
 
-        # Event timestamps should be sorted within each session.
+        # 每个会话内的事件时间戳应当按升序排列。
         session_sort_issues = 0
         for session_id, group in self.events.groupby("session_id"):
             if not group["event_timestamp"].is_monotonic_increasing:
@@ -228,7 +228,7 @@ class DataValidator:
         else:
             report.checks["churn_rate_range"] = True
 
-        # Labels should only exist for users with full observation windows.
+        # 标签应仅存在于拥有完整观察窗口的用户。
         label_users = set(self.labels["user_id"])
         all_users = set(self.users["user_id"])
         if label_users != all_users:
@@ -243,7 +243,7 @@ class DataValidator:
         if campaign_share > 0.20:
             report.add_warning(f"Unusually high campaign event share: {campaign_share:.2%}")
 
-        # Each user should have at least one event (signup).
+        # 每个用户应至少有一个事件（signup）。
         users_without_events = len(set(self.users["user_id"]) - set(self.events["user_id"]))
         if users_without_events > 0:
             report.add_error(f"{users_without_events} users have no events")

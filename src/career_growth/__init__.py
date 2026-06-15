@@ -1,1 +1,1 @@
-"""Career Growth Analytics MVP package."""
+"""Career Growth Analytics MVP 包。"""

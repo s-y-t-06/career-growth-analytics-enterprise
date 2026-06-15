@@ -1,4 +1,4 @@
-"""Pydantic schemas for data validation and type safety."""
+"""数据验证与类型安全的 Pydantic 模型。"""
 
 from datetime import datetime
 from typing import Any
@@ -9,7 +9,7 @@ from career_growth import config
 
 
 class User(BaseModel):
-    """Row-level schema for the users table."""
+    """用户表的行级模型。"""
 
     user_id: str
     signup_timestamp: datetime
@@ -53,7 +53,7 @@ class User(BaseModel):
 
 
 class Event(BaseModel):
-    """Row-level schema for the events table."""
+    """事件表的行级模型。"""
 
     event_id: str
     user_id: str
@@ -90,7 +90,7 @@ class Event(BaseModel):
 
 
 class ExperimentAssignment(BaseModel):
-    """Row-level schema for experiment assignments."""
+    """实验分配的行级模型。"""
 
     experiment_id: str
     user_id: str
@@ -104,7 +104,7 @@ class ExperimentAssignment(BaseModel):
 
 
 class Intervention(BaseModel):
-    """Row-level schema for intervention logs."""
+    """干预日志的行级模型。"""
 
     message_id: str
     user_id: str

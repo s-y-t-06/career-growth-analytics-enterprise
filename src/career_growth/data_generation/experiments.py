@@ -1,4 +1,4 @@
-"""Stable experiment assignment for synthetic users."""
+"""合成用户的稳定实验分配。"""
 
 import hashlib
 
@@ -8,10 +8,10 @@ from career_growth import config
 
 
 def assign_variant(user_id: str, experiment_id: str, variants: list[dict], salt: str = "") -> dict:
-    """Deterministically assign a user to an experiment variant.
+    """以确定性方式将用户分配到实验变体。
 
-    Uses MD5 hash of user_id + experiment_id + salt to ensure reproducibility
-    and user-level stability.
+    使用 user_id + experiment_id + salt 的 MD5 哈希，
+    以确保可复现性和用户级别的稳定性。
     """
     raw = f"{user_id}:{experiment_id}:{salt}".encode("utf-8")
     hash_value = int(hashlib.md5(raw).hexdigest(), 16)
@@ -32,7 +32,7 @@ def create_experiment_assignments(
     experiment_type: str = "onboarding",
     variants: list[dict] | None = None,
 ) -> pd.DataFrame:
-    """Create a stable experiment assignment row for each user."""
+    """为每个用户创建稳定的实验分配行。"""
     if variants is None:
         variants = config.ONBOARDING_VARIANTS
 

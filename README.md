@@ -85,12 +85,12 @@ No external APIs, payment gateways, or cloud services are used. All data is gene
 
 ## Installation
 
-Create and activate a virtual environment, then install the package in editable mode:
+Create and activate a virtual environment in the repository root, then install the package in editable mode:
 
 ```powershell
 python -m venv .venv
 .venv\Scripts\activate
-pip install -e ".[dev]"
+.venv\Scripts\python.exe -m pip install -e ".[dev]"
 ```
 
 On macOS or Linux:
@@ -98,8 +98,10 @@ On macOS or Linux:
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install -e ".[dev]"
+.venv/bin/python -m pip install -e ".[dev]"
 ```
+
+The `.venv/` directory is ignored by Git (see `.gitignore`). Using the virtual environment's interpreter avoids relying on the Windows Store Python shim, which cannot be invoked by absolute path in a fresh terminal.
 
 ## Generate Data
 
@@ -108,10 +110,10 @@ The repository includes a small sample dataset (1,000 users) under `data/sample/
 ```powershell
 # Regenerate the sample dataset
 $env:PYTHONPATH = "src"
-python scripts/generate_data.py --count 1000 --seed 42
+.venv\Scripts\python.exe scripts/generate_data.py --count 1000 --seed 42
 
 # Generate the full 5,000-user dataset used for stable analytics
-python scripts/generate_data.py --count 5000 --seed 42
+.venv\Scripts\python.exe scripts/generate_data.py --count 5000 --seed 42
 ```
 
 Generated files:
@@ -128,7 +130,7 @@ After generating data, run the full analytics pipeline from the project root:
 
 ```powershell
 $env:PYTHONPATH = "src"
-python scripts/run_analysis.py
+.venv\Scripts\python.exe scripts/run_analysis.py
 ```
 
 This executes validation, funnel, retention, cohort, experiment, and Next Best Action analysis.
@@ -137,21 +139,21 @@ This executes validation, funnel, retention, cohort, experiment, and Next Best A
 
 ```powershell
 $env:PYTHONPATH = "src"
-python -m pytest tests -q
+.venv\Scripts\python.exe -m pytest tests -q
 ```
 
 ## Open Notebook
 
 ```powershell
-$env:PYTHONPATH = "src"
-jupyter notebook notebooks/lifecycle_analysis.ipynb
+.venv\Scripts\jupyter.exe notebook notebooks/lifecycle_analysis.ipynb
 ```
 
 To execute the notebook non-interactively:
 
 ```powershell
 $env:PYTHONPATH = "src"
-python scripts/build_notebook.py
+.venv\Scripts\python.exe scripts/build_notebook.py
+.venv\Scripts\python.exe -m nbconvert --execute --to notebook --inplace notebooks/lifecycle_analysis.ipynb
 ```
 
 ## Churn Label Definition

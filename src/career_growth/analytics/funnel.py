@@ -1,4 +1,4 @@
-"""Funnel analytics for the AI career platform."""
+"""AI 职业平台的漏斗分析。"""
 
 from typing import Any
 
@@ -12,19 +12,18 @@ def compute_funnel(
     events: pd.DataFrame,
     group_by: str | None = None,
 ) -> pd.DataFrame:
-    """Compute the core user lifecycle funnel.
+    """计算核心用户生命周期漏斗。
 
-    A user is counted at step n only if they performed step n and all previous
-    steps in the funnel in the correct temporal order.
+    仅当用户按正确时序完成了第 n 步及之前所有步骤时，才会被计入第 n 步。
 
     Args:
-        users: users DataFrame.
-        events: events DataFrame.
-        group_by: optional column in users to group by (e.g. acquisition_channel).
+        users: 用户 DataFrame。
+        events: 事件 DataFrame。
+        group_by: 用户表中可选的分组列（例如 acquisition_channel）。
 
     Returns:
-        DataFrame with columns: step, users, conversion_rate, drop_off_rate,
-        and optionally a group column.
+        包含 step、users、conversion_rate、drop_off_rate 的 DataFrame，
+        以及可选的分组列。
     """
     active_events = events[events["event_source"] == "user_action"].copy()
     first_occurrence = (
@@ -33,7 +32,7 @@ def compute_funnel(
         .unstack()
     )
 
-    # Ensure signup column exists.
+    # 确保 signup 列存在。
     if "signup" not in first_occurrence.columns:
         first_occurrence["signup"] = pd.NaT
 
@@ -58,7 +57,7 @@ def compute_funnel(
                 valid_mask = subset["user_id"].notna()
             else:
                 step_ts = subset[step]
-                # Must have step timestamp and it must be after previous step timestamp.
+                # 必须存在当前步骤时间戳，且晚于上一步骤时间戳。
                 valid_mask = step_ts.notna()
                 if step != config.FUNNEL_STEPS[0]:
                     valid_mask = valid_mask & (step_ts > previous_timestamp)

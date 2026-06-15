@@ -1,4 +1,4 @@
-"""Churn label construction with strict temporal boundaries."""
+"""具有严格时间边界的流失标签构建。"""
 
 import pandas as pd
 
@@ -6,14 +6,13 @@ from career_growth import config
 
 
 def build_labels(users: pd.DataFrame, events: pd.DataFrame) -> pd.DataFrame:
-    """Build churn labels from events.
+    """从事件中构建流失标签。
 
-    The label is derived only from `event_source == "user_action"` events that
-    fall between day 8 and day 21 after signup (inclusive).
+    标签仅来源于 event_source 为 "user_action" 且
+    落在注册后第 8 天至第 21 天（含）之间的事件。
 
-    Only users whose full 21-day observation window is available are included.
-    This is enforced by the data generator, which does not generate signups
-    later than `END_DATE - 21 days`.
+    只包含拥有完整 21 天观察窗口的用户。
+    数据生成器通过不生成晚于 `END_DATE - 21 天` 的注册来确保这一点。
     """
     user_actions = events[events["event_source"] == "user_action"].copy()
 
@@ -46,7 +45,7 @@ def build_labels(users: pd.DataFrame, events: pd.DataFrame) -> pd.DataFrame:
 
 
 def check_label_leakage(features: pd.DataFrame, labels: pd.DataFrame) -> list[str]:
-    """Return a list of leakage issues if feature columns contain future info."""
+    """如果特征列包含未来信息，则返回泄漏问题列表。"""
     forbidden_prefixes = ("future_", "post_", "label_")
     forbidden_columns = {
         "last_active_date",

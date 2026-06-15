@@ -1,4 +1,4 @@
-"""Build the EDA notebook programmatically to ensure valid JSON."""
+"""以编程方式构建 EDA notebook，确保生成有效的 JSON。"""
 
 import nbformat as nbf
 

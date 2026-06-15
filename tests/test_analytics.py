@@ -1,4 +1,4 @@
-"""Tests for analytics modules."""
+"""分析模块的测试。"""
 
 import numpy as np
 import pandas as pd
@@ -61,7 +61,7 @@ def test_cohort_retention_not_all_zero(synthetic_data):
 
 
 def test_cohort_retention_consistent_with_overall(synthetic_data):
-    """Weighted average of cohort retention should match overall day retention."""
+    """同群留存的加权平均值应等于整体留存。"""
     days = [1, 7, 14]
     cohort = compute_cohort_retention(
         synthetic_data["users"], synthetic_data["events"], days=days
@@ -100,7 +100,7 @@ def test_experiment_srm_not_significant(synthetic_data):
 
 
 def test_experiment_srm_matches_scipy(synthetic_data):
-    """SRM p-value must equal scipy.stats.chisquare on the same counts."""
+    """SRM p 值必须与使用相同计数的 scipy.stats.chisquare 结果相等。"""
     results = analyze_experiment(
         synthetic_data["users"],
         synthetic_data["events"],

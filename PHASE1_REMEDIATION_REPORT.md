@@ -3,8 +3,10 @@
 ## 1. Python executable
 
 ```text
-C:\Users\Administrator\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\python.exe
+C:\Users\Administrator\Desktop\career-growth-analytics\.venv\Scripts\python.exe
 ```
+
+说明：原报告中记录的 Windows Store Python 路径是 0 字节重定向器，无法在新终端直接按绝对路径执行。本次补充整改在仓库根目录创建本地虚拟环境 `.venv`，并使用该环境中的解释器完成所有验证。`.venv/` 已加入 `.gitignore`，不会被提交。
 
 ## 2. Modified files
 
@@ -15,6 +17,7 @@ C:\Users\Administrator\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundat
 - `src/career_growth/data_generation/interventions.py`
 - `src/career_growth/analytics/retention.py`
 - `src/career_growth/analytics/experiments.py`
+- 全部源码/脚本/测试文件的注释与 docstring 已中文化（未改动代码逻辑与业务字符串）
 
 ### Tests
 - `tests/conftest.py`
@@ -31,6 +34,7 @@ C:\Users\Administrator\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundat
 - `docs/methodology.md`
 - `pyproject.toml`
 - `.gitignore`
+- `HANDOVER.md`
 
 ### Sample data
 - `data/sample/users.csv` (1,000 users)
@@ -96,10 +100,20 @@ C:\Users\Administrator\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundat
 
 ### 4.1 Install and generate data
 
+创建并激活本地虚拟环境后安装依赖：
+
 ```powershell
 cd C:\Users\Administrator\Desktop\career-growth-analytics
+python -m venv .venv
+.venv\Scripts\activate
+.venv\Scripts\python.exe -m pip install -e ".[dev]"
+```
+
+生成 sample 数据：
+
+```powershell
 $env:PYTHONPATH = "src"
-python scripts/generate_data.py --count 1000 --seed 42
+.venv\Scripts\python.exe scripts/generate_data.py --count 1000 --seed 42
 ```
 
 Output:
@@ -113,7 +127,7 @@ Churn rate: 39.00%
 
 ```powershell
 $env:PYTHONPATH = "src"
-python scripts/run_analysis.py
+.venv\Scripts\python.exe scripts/run_analysis.py
 ```
 
 Validation passed: `True`.
@@ -133,7 +147,7 @@ Sample data metrics:
 
 ```powershell
 $env:PYTHONPATH = "src"
-python -m pytest tests -q
+.venv\Scripts\python.exe -m pytest tests -q
 ```
 
 Output:
@@ -159,8 +173,8 @@ tests\test_validation.py ....
 
 ```powershell
 $env:PYTHONPATH = "src"
-python scripts/build_notebook.py
-python -m nbconvert --execute --to notebook --inplace notebooks/lifecycle_analysis.ipynb
+.venv\Scripts\python.exe scripts/build_notebook.py
+.venv\Scripts\python.exe -m nbconvert --execute --to notebook --inplace notebooks/lifecycle_analysis.ipynb
 ```
 
 Output:
@@ -248,6 +262,8 @@ Commit after remediation:
 ```text
 157acdf Phase 1 remediation: reproducibility, retention, SRM, interventions, realism, docs, cleanup
 ```
+
+补充整改提交（环境可复验 + 注释中文化）待本次任务完成后记录。
 
 ## 7. Remaining risks and limitations
 

@@ -1,25 +1,25 @@
-"""Project-wide configuration for the MVP synthetic data pipeline."""
+"""MVP 合成数据管道的项目级配置。"""
 
 from datetime import datetime, timedelta, timezone
 from typing import Final
 
 RANDOM_SEED: Final[int] = 42
 
-# Global observation window for data generation.
-# Users are generated across 90 days, ending 21 days before the data freeze
-# so that every user has a complete churn label window.
+# 数据生成的全局观察窗口。
+# 用户在 90 天内生成，截止日期为数据冻结前 21 天，
+# 以确保每个用户都有完整的流失标签窗口。
 END_DATE: Final[datetime] = datetime(2026, 6, 1, 23, 59, 59, tzinfo=timezone.utc)
 STUDY_START_DATE: Final[datetime] = END_DATE - timedelta(days=90)
 
-# Number of synthetic users to generate.
+# 要生成的合成用户数量。
 DEFAULT_USER_COUNT: Final[int] = 5_000
 
-# Churn label window in days after signup.
+# 注册后用于定义流失标签的天数窗口。
 PREDICTION_CUTOFF_DAY: Final[int] = 7
 LABEL_WINDOW_START_DAY: Final[int] = 8
 LABEL_WINDOW_END_DAY: Final[int] = 21
 
-# Acquisition channels with expected proportions.
+# 获客渠道及其预期占比。
 ACQUISITION_CHANNELS: Final[list[str]] = [
     "organic_search",
     "social_ads",
@@ -29,11 +29,11 @@ ACQUISITION_CHANNELS: Final[list[str]] = [
 ]
 ACQUISITION_CHANNEL_WEIGHTS: Final[list[float]] = [0.35, 0.25, 0.20, 0.10, 0.10]
 
-# Device types.
+# 设备类型。
 DEVICE_TYPES: Final[list[str]] = ["desktop", "mobile", "tablet"]
 DEVICE_TYPE_WEIGHTS: Final[list[float]] = [0.45, 0.40, 0.15]
 
-# Countries, languages and timezones.
+# 国家、语言和时区。
 COUNTRY_CONFIG: Final[dict[str, dict[str, str]]] = {
     "US": {"language": "en", "timezone": "America/New_York"},
     "CN": {"language": "zh", "timezone": "Asia/Shanghai"},
@@ -48,15 +48,15 @@ COUNTRY_CONFIG: Final[dict[str, dict[str, str]]] = {
 }
 COUNTRY_WEIGHTS: Final[list[float]] = [0.35, 0.25, 0.15, 0.10, 0.05, 0.03, 0.02, 0.02, 0.02, 0.01]
 
-# Career stages.
+# 职业阶段。
 CAREER_STAGES: Final[list[str]] = ["student", "new_graduate", "early_career"]
 CAREER_STAGE_WEIGHTS: Final[list[float]] = [0.45, 0.30, 0.25]
 
-# User intent levels.
+# 用户意向等级。
 USER_INTENT_LEVELS: Final[list[str]] = ["low", "medium", "high"]
 USER_INTENT_WEIGHTS: Final[list[float]] = [0.30, 0.45, 0.25]
 
-# Core event names.
+# 核心事件名称。
 CORE_EVENTS: Final[list[str]] = [
     "signup",
     "onboarding_start",
@@ -69,7 +69,7 @@ CORE_EVENTS: Final[list[str]] = [
     "career_report_generate",
 ]
 
-# Additional events allowed in the event stream.
+# 事件流中允许的附加事件。
 EXTRA_EVENTS: Final[list[str]] = [
     "session_start",
     "session_end",
@@ -83,10 +83,10 @@ EXTRA_EVENTS: Final[list[str]] = [
 
 ALL_EVENT_NAMES: Final[list[str]] = CORE_EVENTS + EXTRA_EVENTS
 
-# Event source values.
+# 事件来源取值。
 EVENT_SOURCES: Final[list[str]] = ["user_action", "system", "campaign"]
 
-# Onboarding experiment definition.
+# 新手引导实验定义。
 ONBOARDING_EXPERIMENT_ID: Final[str] = "exp_onboarding_v1"
 ONBOARDING_EXPERIMENT_NAME: Final[str] = "Onboarding Flow Optimization"
 ONBOARDING_VARIANTS: Final[list[dict[str, str | float]]] = [
@@ -95,7 +95,7 @@ ONBOARDING_VARIANTS: Final[list[dict[str, str | float]]] = [
     {"variant_id": "simplified", "name": "two-step onboarding", "allocation": 0.30, "effect": 0.15},
 ]
 
-# Funnel steps used in analytics.
+# 分析中使用的漏斗步骤。
 FUNNEL_STEPS: Final[list[str]] = [
     "signup",
     "onboarding_complete",
@@ -106,6 +106,6 @@ FUNNEL_STEPS: Final[list[str]] = [
     "career_report_generate",
 ]
 
-# Data output paths.
+# 数据输出路径。
 SAMPLE_DATA_DIR: Final[str] = "data/sample"
 PROCESSED_DATA_DIR: Final[str] = "data/processed"

@@ -1,25 +1,28 @@
 # 交接报告：Career Growth Analytics Phase 1 整改
 
 > 本报告用于会话重启后下一任 AI 快速接手。请优先阅读本文件，再阅读 `PHASE1_REMEDIATION_REPORT.md`。
+> 新增永久协作约束：每次新会话必须独立阅读 HANDOVER.md、任务书/验收要求、最近阶段报告、README.md、git status 和最近 5 条 commit；工作结束前必须更新 HANDOVER.md 并写入 `docs/worklogs/`。
 
 ## 1. 项目基本信息
 
 - **MVP 仓库**：`C:\Users\Administrator\Desktop\career-growth-analytics`
 - **项目名**：Career Growth Analytics
 - **业务场景**：AI Career Platform 用户生命周期增长与实验优化系统
-- **当前阶段**：Phase 1 整改已完成，等待 Codex 复验
+- **当前阶段**：Phase 1 整改已完成，等待 Codex 最终验收
 - **严格约束**：**不得开始 Phase 2（模型训练、API、数据库、前端开发）**，必须等 Codex 审批
 - **合规要求**：不得使用任何 lychas 相关代码、数据或命名
 
 ## 2. 当前 git 状态
 
 ```text
-主要整改 commit: 157acdf Phase 1 remediation: reproducibility, retention, SRM, interventions, realism, docs, cleanup
-当前 HEAD 请执行 git log --oneline 查看
-更早提交: 74bc006, 95d1780
+465e9ed docs: update HANDOVER.md to avoid self-referential HEAD hash
+3bad450 docs: add HANDOVER.md for next AI session
+39f49d7 docs: record final remediation commit hash in report
+157acdf Phase 1 remediation: reproducibility, retention, SRM, interventions, realism, docs, cleanup
+74bc006 Phase 1 MVP final: add executed notebook, docs and scripts
 ```
 
-工作目录干净，无未提交修改。
+当前工作目录有未提交修改：README.md、HANDOVER.md 及源码注释中文化。本次任务完成后将统一提交。
 
 ## 3. 已完成的整改内容（Phase 1 Remediation）
 
@@ -37,6 +40,8 @@
 | 文档规范（README、pyproject、methodology） | 完成 | `README.md`, `pyproject.toml`, `docs/methodology.md` |
 | Notebook 可执行 | 完成 | `notebooks/lifecycle_analysis.ipynb` |
 | 验收报告 | 完成 | `PHASE1_REMEDIATION_REPORT.md` |
+| 本地 .venv 环境可用，命令可复验 | 完成 | `.venv/`（已加入 `.gitignore`），`README.md` 已更新 |
+| 源码/脚本/测试注释中文化 | 完成 | 全部 24 个 Python 文件 |
 
 ### 当前关键校准参数
 
@@ -57,15 +62,39 @@ ONBOARDING_VARIANTS = [
 - 第一周每日活跃概率：`0.01 + 0.50 * engagement_score + 0.05 * onboarding_complete`
 - 后期每日活跃概率：`0.001 + 0.08 * engagement_score + 0.015 * num_core_actions`
 
+### 当前 Python 环境
+
+- 真实可用解释器：仓库本地虚拟环境 `.venv\Scripts\python.exe`
+- 解释器版本：Python 3.11.9
+- 依赖安装方式：`.venv\Scripts\python.exe -m pip install -e ".[dev]"`
+- 注意：Windows Store 的 `python.exe` 路径（`C:\Users\Administrator\AppData\Local\Microsoft\WindowsApps\...`）是 0 字节重定向器，无法在新终端直接按绝对路径调用；因此统一使用 `.venv` 中的解释器。
+
 ### 当前测试状态
 
 ```powershell
 cd C:\Users\Administrator\Desktop\career-growth-analytics
 $env:PYTHONPATH = "src"
-python -m pytest tests -q
+.venv\Scripts\python.exe -m pytest tests -q
 ```
 
-结果：29 passed。
+结果：
+
+```text
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.0, pluggy-1.6.0
+rootdir: C:\Users\Administrator\Desktop\career-growth-analytics
+configfile: pyproject.toml
+testpaths: tests
+collected 29 items
+
+tests\test_analytics.py ...........
+tests\test_data_generation.py .........
+tests\test_decisions.py ..
+tests\test_features.py ...
+tests\test_validation.py ....
+
+============================= 29 passed in 53.06s =============================
+```
 
 ### 当前数据状态
 
@@ -73,7 +102,7 @@ python -m pytest tests -q
 - 完整 **5,000 用户** 数据需本地重新生成：
   ```powershell
   $env:PYTHONPATH = "src"
-  python scripts/generate_data.py --count 5000 --seed 42
+  .venv\Scripts\python.exe scripts/generate_data.py --count 5000 --seed 42
   ```
 
 ### 最新全量 5,000 用户指标（供参考）
@@ -178,30 +207,34 @@ python -m pytest tests -q
 # 进入项目目录
 cd C:\Users\Administrator\Desktop\career-growth-analytics
 
+# 创建并激活本地虚拟环境（首次）
+python -m venv .venv
+.venv\Scripts\activate
+
+# 安装依赖（每次 pyproject.toml 变更后）
+.venv\Scripts\python.exe -m pip install -e ".[dev]"
+
 # 设置 PYTHONPATH（Windows PowerShell）
 $env:PYTHONPATH = "src"
 
-# 安装依赖
-pip install -e ".[dev]"
-
 # 生成 sample 数据（1000 用户）
-python scripts/generate_data.py --count 1000 --seed 42
+.venv\Scripts\python.exe scripts/generate_data.py --count 1000 --seed 42
 
 # 生成完整数据（5000 用户）
-python scripts/generate_data.py --count 5000 --seed 42
+.venv\Scripts\python.exe scripts/generate_data.py --count 5000 --seed 42
 
 # 运行完整分析
-python scripts/run_analysis.py
+.venv\Scripts\python.exe scripts/run_analysis.py
 
 # 打印摘要
-python scripts/compute_summary.py
+.venv\Scripts\python.exe scripts/compute_summary.py
 
 # 运行测试
-python -m pytest tests -q
+.venv\Scripts\python.exe -m pytest tests -q
 
 # 重建并执行 Notebook
-python scripts/build_notebook.py
-python -m nbconvert --execute --to notebook --inplace notebooks/lifecycle_analysis.ipynb
+.venv\Scripts\python.exe scripts/build_notebook.py
+.venv\Scripts\python.exe -m nbconvert --execute --to notebook --inplace notebooks/lifecycle_analysis.ipynb
 ```
 
 ## 6. 关键文件清单
@@ -228,6 +261,14 @@ python -m nbconvert --execute --to notebook --inplace notebooks/lifecycle_analys
 
 ## 8. 下一步建议
 
-1. 等待 Codex 对 Phase 1 整改进行复验。
+1. 等待 Codex 对 Phase 1 整改进行最终验收。
 2. 若 Codex 批准，则开始 Phase 2：Churn 预测模型（Logistic Regression baseline + HistGradientBoosting）、特征工程、模型评估、SHAP/校准、Enterprise API 兼容性准备。
 3. 若 Codex 提出新整改要求，继续按上述约束执行。
+
+---
+
+## 附录：本次会话工作记录摘要
+
+- **会话时间**：2026-06-15
+- **本次任务**：新增无状态会话交接制度；验证真实 Python 环境；创建 `.venv`；用 `.venv` 重新运行 29 项测试；更新 README/HANDOVER/整改报告命令；将源码注释中文化；清理临时资源；提交修改。
+- **详细工作日志**：见 `docs/worklogs/2026-06-15_phase1_environment-and-docs.md`

@@ -1,4 +1,4 @@
-"""Synthetic event stream generation for the AI career platform."""
+"""AI 职业平台的合成事件流生成。"""
 
 import json
 import uuid
@@ -11,8 +11,8 @@ import pandas as pd
 from career_growth import config
 
 
-# Logistic parameters for core milestone events.
-# Each tuple is (intercept, ie_coef, pf_coef, cu_coef, intent_coef, device_coef, stage_coef)
+# 核心里程碑事件的 logistic 参数。
+# 每个元组为 (intercept, ie_coef, pf_coef, cu_coef, intent_coef, device_coef, stage_coef)
 CORE_EVENT_LOGIT_PARAMS: dict[str, tuple[float, float, float, float, float, float, float]] = {
     "onboarding_start": (-0.60, 0.50, 0.30, 0.20, 0.20, 0.10, 0.10),
     "onboarding_complete": (-2.20, 1.80, 1.30, 0.70, 0.45, 0.25, 0.15),
@@ -24,7 +24,7 @@ CORE_EVENT_LOGIT_PARAMS: dict[str, tuple[float, float, float, float, float, floa
     "career_report_generate": (-1.00, 1.00, 0.40, 0.40, 0.25, 0.08, 0.08),
 }
 
-# Day ranges for assigning milestone timestamps.
+# 分配里程碑时间戳的天数范围。
 MILESTONE_DAY_RANGES: dict[str, tuple[int, int]] = {
     "onboarding_start": (0, 0),
     "onboarding_complete": (0, 0),
@@ -36,8 +36,8 @@ MILESTONE_DAY_RANGES: dict[str, tuple[int, int]] = {
     "career_report_generate": (4, 7),
 }
 
-# State bonuses for downstream milestones.
-# Positive bonus if prerequisite occurred; negative penalty if it did not.
+# 下游里程碑的状态加成。
+# 若前置事件发生则获得正向加成，否则受到负向惩罚。
 STATE_BONUSES: dict[str, dict[str, tuple[float, float]]] = {
     "onboarding_complete": {"onboarding_start": (0.0, -3.0)},
     "profile_complete": {"onboarding_start": (0.10, -0.80), "onboarding_complete": (0.25, -1.50)},
@@ -110,17 +110,17 @@ def _generate_milestones(
     variant_effect: float,
     rng: np.random.Generator,
 ) -> dict[str, datetime]:
-    """Decide which core milestones occur and assign timestamps.
+    """决定哪些核心里程碑会发生，并分配时间戳。
 
-    The onboarding treatment only directly affects onboarding events.
-    Downstream effects emerge from the user state and funnel prerequisites.
+    新手引导处理仅直接影响新手引导事件。
+    下游效应通过用户状态和漏斗前置条件自然产生。
     """
     milestones: dict[str, datetime] = {}
     occurred: set[str] = set()
 
     for event_name in config.CORE_EVENTS:
         if event_name == "signup":
-            # Signup is always at signup_timestamp and handled separately.
+            # signup 始终在 signup_timestamp 发生，并单独处理。
             continue
 
         params = CORE_EVENT_LOGIT_PARAMS[event_name]
@@ -132,12 +132,12 @@ def _generate_milestones(
             else:
                 state_bonus += penalty
 
-        # Direct treatment effect is applied only to onboarding events.
+        # 直接处理效应仅应用于新手引导事件。
         direct_effect = variant_effect if event_name in {"onboarding_start", "onboarding_complete"} else 0.0
         probability = _event_probability(params, row, direct_effect, state_bonus)
         if rng.random() < probability:
             low, high = MILESTONE_DAY_RANGES[event_name]
-            # Shift day forward if a prerequisite occurred later than the default low bound.
+            # 如果前置事件发生在默认下界之后，则将天数向前调整。
             for prerequisite in STATE_BONUSES.get(event_name, {}):
                 if prerequisite in milestones:
                     prereq_day = (milestones[prerequisite] - row["signup_timestamp"]).days
@@ -182,7 +182,7 @@ def _extra_user_actions(
     milestones: dict[str, datetime],
     day_offset: int,
 ) -> list[str]:
-    """Generate contextual extra user_action events for an active day."""
+    """为活跃的一天生成情境化的额外 user_action 事件。"""
     extras: list[str] = []
     if rng.random() < 0.30:
         extras.append("job_detail_view")
@@ -201,7 +201,7 @@ def generate_events_for_user(
     rng: np.random.Generator,
     seed: int = config.RANDOM_SEED,
 ) -> list[dict[str, Any]]:
-    """Generate the complete event stream for a single user."""
+    """生成单个用户的完整事件流。"""
     signup = row["signup_timestamp"]
     platform = _platform_for_device(row["device_type"], rng)
     experiment_id = experiment_assignment["experiment_id"]
@@ -234,10 +234,10 @@ def generate_events_for_user(
         job_counter += 1
         return str(uuid.uuid5(uuid.NAMESPACE_OID, f"job-{seed}-{user_id}-{job_counter}"))
 
-    # Event queue: (timestamp, sort_order, event_name, event_source, properties, page_name, session_id)
+    # 事件队列：(timestamp, sort_order, event_name, event_source, properties, page_name, session_id)
     event_queue: list[tuple] = []
 
-    # Signup event.
+    # 注册事件。
     event_queue.append(
         (
             signup,
@@ -250,7 +250,7 @@ def generate_events_for_user(
         )
     )
 
-    # Add milestone events.
+    # 添加里程碑事件。
     for event_name, ts in milestones.items():
         props: dict[str, Any] = {"variant_id": variant_id}
         if event_name == "job_save":
@@ -269,7 +269,7 @@ def generate_events_for_user(
             )
         )
 
-    # Daily sessions for days 0-7.
+    # 第 0-7 天的每日会话。
     active_days_first_week: set[int] = set()
     for day_offset in range(0, config.PREDICTION_CUTOFF_DAY + 1):
         p_active = _daily_activity_probability(
@@ -323,7 +323,7 @@ def generate_events_for_user(
             )
         )
 
-    # Daily activity for days 8-21 (label window).
+    # 第 8-21 天的每日活动（标签窗口）。
     for day_offset in range(config.LABEL_WINDOW_START_DAY, config.LABEL_WINDOW_END_DAY + 1):
         p_active = _daily_activity_probability(
             row, onboarding_complete, num_core_actions, late_phase=True
@@ -369,7 +369,7 @@ def generate_events_for_user(
                 )
             )
 
-    # Campaign events: simulate a small number of system/campaign messages.
+    # 活动事件：模拟少量系统/活动消息。
     if row["marketing_consent"] and rng.random() < 0.10:
         campaign_day = rng.integers(1, config.PREDICTION_CUTOFF_DAY + 1)
         campaign_time = _random_time_on_day(signup, int(campaign_day), rng)
@@ -386,7 +386,7 @@ def generate_events_for_user(
             )
         )
 
-    # Sort by timestamp, then by internal order to maintain logical sequence.
+    # 按时间戳排序，再按内部顺序排序以保持逻辑序列。
     event_queue.sort(key=lambda x: (x[0], x[1]))
 
     events: list[dict[str, Any]] = []

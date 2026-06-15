@@ -1,4 +1,4 @@
-"""Main data generation orchestrator."""
+"""主数据生成协调器。"""
 
 import json
 import os
@@ -21,23 +21,23 @@ def generate_all_data(
     seed: int = config.RANDOM_SEED,
     output_dir: str = "data",
 ) -> dict[str, pd.DataFrame]:
-    """Generate the complete MVP synthetic dataset.
+    """生成完整的 MVP 合成数据集。
 
-    Returns a dictionary containing raw and processed DataFrames and writes
-    CSV files to `output_dir/sample/` and `output_dir/processed/`.
+    返回包含原始和已处理 DataFrame 的字典，并将 CSV 文件写入
+    `output_dir/sample/` 和 `output_dir/processed/`。
     """
     rng = np.random.default_rng(seed)
 
-    # 1. Users.
+    # 1. 用户。
     users = generate_users(count, rng, seed=seed)
 
-    # 2. Experiment assignments.
+    # 2. 实验分配。
     experiment_assignments = create_experiment_assignments(users)
     assignment_by_user = {
         row["user_id"]: row.to_dict() for _, row in experiment_assignments.iterrows()
     }
 
-    # 3. Event streams.
+    # 3. 事件流。
     all_events: list[dict[str, Any]] = []
     for _, user_row in users.iterrows():
         assignment = assignment_by_user[user_row["user_id"]]
@@ -45,7 +45,7 @@ def generate_all_data(
         all_events.extend(user_events)
     events = pd.DataFrame(all_events)
 
-    # Users: drop hidden propensity columns before saving or passing downstream.
+    # 用户：在保存或传递给下游之前删除隐藏的倾向性列。
     hidden_cols = [
         "intrinsic_engagement",
         "career_urgency",
@@ -57,13 +57,13 @@ def generate_all_data(
     ]
     users_public = users.drop(columns=hidden_cols)
 
-    # 4. Labels (must be built before interventions so win-back logic is consistent).
+    # 4. 标签（必须在干预之前构建，以保证挽回逻辑一致）。
     labels = build_labels(users, events)
 
-    # 5. Interventions.
+    # 5. 干预。
     interventions = generate_interventions(users_public, events, labels, rng, seed=seed)
 
-    # 6. Update experiment conversions (onboarding completion).
+    # 6. 更新实验转化（新手引导完成）。
     onboarding_users = set(
         events[
             (events["event_name"] == "onboarding_complete")
@@ -74,7 +74,7 @@ def generate_all_data(
         onboarding_users
     )
 
-    # 7. Persist.
+    # 7. 持久化。
     sample_dir = Path(output_dir) / "sample"
     processed_dir = Path(output_dir) / "processed"
     sample_dir.mkdir(parents=True, exist_ok=True)
@@ -86,7 +86,7 @@ def generate_all_data(
     interventions.to_csv(sample_dir / "interventions.csv", index=False)
     labels.to_csv(processed_dir / "labels.csv", index=False)
 
-    # Save generation metadata.
+    # 保存生成元数据。
     metadata = {
         "user_count": count,
         "seed": seed,

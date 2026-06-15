@@ -1,4 +1,4 @@
-"""Synthetic user generation with hidden propensity variables."""
+"""带有隐藏倾向性变量的合成用户生成。"""
 
 import uuid
 from datetime import datetime, timedelta
@@ -31,10 +31,9 @@ def generate_users(
     study_start: datetime = config.STUDY_START_DATE,
     data_freeze: datetime = config.END_DATE,
 ) -> pd.DataFrame:
-    """Generate the users table with hidden propensity variables.
+    """生成带有隐藏倾向性变量的用户表。
 
-    The hidden propensity columns are kept for event generation but must be
-    removed before persisting the users table.
+    隐藏倾向性列在事件生成期间保留，但必须在持久化用户表之前移除。
     """
     latest_signup = data_freeze - timedelta(days=config.LABEL_WINDOW_END_DAY)
     delta_seconds = int((latest_signup - study_start).total_seconds())
@@ -75,23 +74,23 @@ def generate_users(
         }
     )
 
-    # Derived language and timezone from country.
+    # 根据国家派生语言与时区。
     df["language"] = df["country"].map(lambda c: config.COUNTRY_CONFIG[c]["language"])
     df["timezone"] = df["country"].map(lambda c: config.COUNTRY_CONFIG[c]["timezone"])
     df["initial_plan_type"] = "free"
 
-    # Hidden propensity variables used only during generation.
+    # 仅在生成阶段使用的隐藏倾向性变量。
     df["intrinsic_engagement"] = rng.beta(2.0, 2.0, size=count)
     df["career_urgency"] = rng.beta(2.5, 2.0, size=count)
     df["product_fit"] = rng.beta(2.0, 2.0, size=count)
     df["notification_sensitivity"] = rng.beta(2.0, 3.0, size=count)
 
-    # Encoded scores used in probability formulas.
+    # 概率公式中使用的编码分数。
     df["intent_score"] = _encode_intent(df["user_intent_level"])
     df["career_stage_score"] = _encode_career_stage(df["career_stage"])
     df["device_score"] = _encode_device(df["device_type"])
 
-    # Introduce a small anomaly set: ~3% of users have inverted behavior.
+    # 引入一个小规模异常集合：约 3% 的用户具有反转行为。
     anomaly_mask = rng.random(size=count) < 0.03
     df.loc[anomaly_mask, "intrinsic_engagement"] = 1.0 - df.loc[anomaly_mask, "intrinsic_engagement"]
 

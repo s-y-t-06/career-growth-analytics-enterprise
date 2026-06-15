@@ -1,4 +1,4 @@
-"""A/B experiment analysis utilities."""
+"""A/B 实验分析工具。"""
 
 from dataclasses import dataclass
 from typing import Any
@@ -12,7 +12,7 @@ from career_growth import config
 
 @dataclass
 class ExperimentMetricResult:
-    """Result of a single metric comparison between two variants."""
+    """两个变体之间单一指标对比的结果。"""
 
     variant_id: str
     sample_size: int
@@ -31,7 +31,7 @@ def two_proportion_z_test(
     conversions_b: int,
     n_b: int,
 ) -> tuple[float, float, float, float]:
-    """Return z-statistic, p-value, absolute lift, and 95% CI for the difference."""
+    """返回 z 统计量、p 值、绝对提升以及差异的 95% 置信区间。"""
     p_a = conversions_a / n_a if n_a > 0 else 0.0
     p_b = conversions_b / n_b if n_b > 0 else 0.0
     p_pooled = (conversions_a + conversions_b) / (n_a + n_b) if (n_a + n_b) > 0 else 0.0
@@ -55,19 +55,19 @@ def analyze_experiment(
     metrics: dict[str, str] | None = None,
     control_variant: str = "control",
 ) -> dict[str, Any]:
-    """Analyze an A/B experiment and return metric comparisons.
+    """分析 A/B 实验并返回各指标对比结果。
 
     Args:
-        users: users DataFrame.
-        events: events DataFrame.
-        experiment_assignments: experiment assignments DataFrame.
-        experiment_id: experiment to analyze.
-        metrics: mapping from metric name to event name used as conversion.
-            Defaults to onboarding_completion, profile_completion, d7_retention.
-        control_variant: variant used as control.
+        users: 用户 DataFrame。
+        events: 事件 DataFrame。
+        experiment_assignments: 实验分配 DataFrame。
+        experiment_id: 要分析的实验。
+        metrics: 从指标名称到用作转化的事件名称的映射。
+            默认为 onboarding_completion、profile_completion、d7_retention。
+        control_variant: 用作对照的变体。
 
     Returns:
-        Dictionary with sample sizes, SRM test, and metric results per variant.
+        包含各变体样本量、SRM 检验和指标结果的字典。
     """
     if metrics is None:
         metrics = {
@@ -79,7 +79,7 @@ def analyze_experiment(
     subset = experiment_assignments[experiment_assignments["experiment_id"] == experiment_id].copy()
     subset = subset.merge(users[["user_id", "signup_timestamp"]], on="user_id", how="left")
 
-    # Compute D7 retention per user.
+    # 计算每个用户的 D7 留存。
     active_events = events[events["event_source"] == "user_action"].copy()
     active_events["event_date"] = active_events["event_timestamp"].dt.floor("D")
     signup_dates = subset.set_index("user_id")["signup_timestamp"].dt.floor("D")
@@ -91,10 +91,10 @@ def analyze_experiment(
         for uid in subset["user_id"]
     }
 
-    # Compute event-based conversions per user.
+    # 计算基于事件的每个用户转化数。
     user_events = active_events.groupby("user_id")["event_name"].apply(set).to_dict()
 
-    # SRM check using a one-way chi-squared goodness-of-fit test.
+    # 使用单因素卡方拟合优度检验进行样本比例不匹配（SRM）检查。
     observed = subset["variant_id"].value_counts().sort_index().values
     expected_allocations = {v["variant_id"]: v["allocation"] for v in config.ONBOARDING_VARIANTS}
     expected = np.array(

@@ -1,4 +1,4 @@
-"""Print a concise summary of the generated dataset."""
+"""输出生成数据集的简明摘要。"""
 
 import pandas as pd
 
