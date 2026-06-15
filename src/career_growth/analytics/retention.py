@@ -5,6 +5,11 @@ import pandas as pd
 from career_growth import config
 
 
+def _normalize_date(series: pd.Series) -> pd.Series:
+    """Return a tz-naive floor-to-day Series for consistent date comparisons."""
+    return series.dt.tz_localize(None).dt.floor("D")
+
+
 def compute_day_retention(
     users: pd.DataFrame,
     events: pd.DataFrame,
@@ -17,10 +22,10 @@ def compute_day_retention(
     whose calendar day equals signup_date + N.
     """
     active_events = events[events["event_source"] == "user_action"].copy()
-    active_events["event_date"] = active_events["event_timestamp"].dt.floor("D")
+    active_events["event_date"] = _normalize_date(active_events["event_timestamp"])
 
     users_copy = users.copy()
-    users_copy["signup_date"] = users_copy["signup_timestamp"].dt.floor("D")
+    users_copy["signup_date"] = _normalize_date(users_copy["signup_timestamp"])
     target_date = users_copy["signup_date"] + pd.Timedelta(days=day)
 
     # Vectorized approach: build a set of (user_id, event_date) pairs.
@@ -35,6 +40,7 @@ def compute_day_retention(
         return pd.DataFrame({"day": [day], "retention_rate": [overall]})
 
     grouped = users_copy.groupby(group_by)["retained"].mean().reset_index()
+    grouped = grouped.rename(columns={"retained": "retention_rate"})
     grouped["day"] = day
     return grouped[[group_by, "day", "retention_rate"]]
 
@@ -54,10 +60,10 @@ def compute_cohort_retention(
     - variant_id (requires merging experiment assignments)
     """
     active_events = events[events["event_source"] == "user_action"].copy()
-    active_events["event_date"] = active_events["event_timestamp"].dt.floor("D")
+    active_events["event_date"] = _normalize_date(active_events["event_timestamp"])
 
     users_copy = users.copy()
-    users_copy["signup_date"] = users_copy["signup_timestamp"].dt.tz_localize(None).dt.floor("D")
+    users_copy["signup_date"] = _normalize_date(users_copy["signup_timestamp"])
 
     if cohort_col == "signup_week":
         users_copy["signup_week"] = users_copy["signup_date"].dt.to_period("W").astype(str)
@@ -104,3 +110,25 @@ def compute_rolling_retention(
     users_copy = users_copy.merge(user_last_event.rename("last_event"), on="user_id", how="left")
     retained = (users_copy["last_event"] >= users_copy["cutoff"]).sum()
     return retained / len(users_copy) if len(users_copy) > 0 else 0.0
+
+
+def compute_retention_by_variant(
+    users: pd.DataFrame,
+    events: pd.DataFrame,
+    experiment_assignments: pd.DataFrame,
+    day: int,
+    experiment_id: str = config.ONBOARDING_EXPERIMENT_ID,
+) -> pd.DataFrame:
+    """Compute day-N retention grouped by experiment variant.
+
+    The function merges experiment assignments onto a copy of ``users`` and
+    delegates to ``compute_day_retention``.
+    """
+    users_with_variant = users.merge(
+        experiment_assignments[
+            experiment_assignments["experiment_id"] == experiment_id
+        ][["user_id", "variant_id"]],
+        on="user_id",
+        how="left",
+    )
+    return compute_day_retention(users_with_variant, events, day, group_by="variant_id")

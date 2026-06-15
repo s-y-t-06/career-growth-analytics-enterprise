@@ -5,7 +5,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-from scipy.stats import chi2_contingency, norm
+from scipy.stats import chisquare, norm
 
 from career_growth import config
 
@@ -94,13 +94,13 @@ def analyze_experiment(
     # Compute event-based conversions per user.
     user_events = active_events.groupby("user_id")["event_name"].apply(set).to_dict()
 
-    # SRM check.
+    # SRM check using a one-way chi-squared goodness-of-fit test.
     observed = subset["variant_id"].value_counts().sort_index().values
     expected_allocations = {v["variant_id"]: v["allocation"] for v in config.ONBOARDING_VARIANTS}
     expected = np.array(
         [expected_allocations[v] * len(subset) for v in sorted(expected_allocations)]
     )
-    chi2, srm_p_value, _, _ = chi2_contingency([observed, expected])
+    chi2, srm_p_value = chisquare(observed, f_exp=expected)
 
     results = {
         "experiment_id": experiment_id,

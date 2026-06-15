@@ -91,8 +91,8 @@ ONBOARDING_EXPERIMENT_ID: Final[str] = "exp_onboarding_v1"
 ONBOARDING_EXPERIMENT_NAME: Final[str] = "Onboarding Flow Optimization"
 ONBOARDING_VARIANTS: Final[list[dict[str, str | float]]] = [
     {"variant_id": "control", "name": "standard five-step onboarding", "allocation": 0.40, "effect": 0.0},
-    {"variant_id": "personalized", "name": "adaptive onboarding", "allocation": 0.30, "effect": 0.60},
-    {"variant_id": "simplified", "name": "two-step onboarding", "allocation": 0.30, "effect": 0.40},
+    {"variant_id": "personalized", "name": "adaptive onboarding", "allocation": 0.30, "effect": 0.30},
+    {"variant_id": "simplified", "name": "two-step onboarding", "allocation": 0.30, "effect": 0.15},
 ]
 
 # Funnel steps used in analytics.

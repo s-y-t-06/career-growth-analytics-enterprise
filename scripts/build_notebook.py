@@ -54,13 +54,17 @@ def main() -> None:
 
     cells.append(
         nbf.v4.new_code_cell(
-            "users = pd.read_csv('../data/sample/users.csv', parse_dates=['signup_timestamp'])\n"
-            "events = pd.read_csv('../data/sample/events.csv', parse_dates=['event_timestamp'])\n"
+            "import os\n"
+            "if os.path.basename(os.getcwd()) == 'notebooks':\n"
+            "    os.chdir('..')\n"
+            "\n"
+            "users = pd.read_csv('data/sample/users.csv', parse_dates=['signup_timestamp'])\n"
+            "events = pd.read_csv('data/sample/events.csv', parse_dates=['event_timestamp'])\n"
             "experiment_assignments = pd.read_csv(\n"
-            "    '../data/sample/experiment_assignments.csv', parse_dates=['assignment_time']\n"
+            "    'data/sample/experiment_assignments.csv', parse_dates=['assignment_time']\n"
             ")\n"
-            "interventions = pd.read_csv('../data/sample/interventions.csv', parse_dates=['send_time'])\n"
-            "labels = pd.read_csv('../data/processed/labels.csv', parse_dates=['label_start', 'label_end'])\n"
+            "interventions = pd.read_csv('data/sample/interventions.csv', parse_dates=['send_time'])\n"
+            "labels = pd.read_csv('data/processed/labels.csv', parse_dates=['label_start', 'label_end'])\n"
             "\n"
             "print(f'Users: {len(users):,}')\n"
             "print(f'Events: {len(events):,}')\n"
@@ -72,7 +76,7 @@ def main() -> None:
 
     cells.append(
         nbf.v4.new_code_cell(
-            "validator = DataValidator('../data')\n"
+            "validator = DataValidator('data')\n"
             "validator.users = users\n"
             "validator.events = events\n"
             "validator.experiment_assignments = experiment_assignments\n"

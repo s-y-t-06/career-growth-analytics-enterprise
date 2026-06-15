@@ -10,7 +10,7 @@ readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.10"
 authors = [
-    {name = "Deepmanifold Candidate"}
+    {name = "Su Yutong"}
 ]
 keywords = ["growth", "analytics", "lifecycle", "experimentation", "career"]
 classifiers = [
@@ -41,10 +41,6 @@ dev = [
     "nbconvert>=7.0.0",
     "ipython>=8.14.0",
 ]
-
-[project.urls]
-Homepage = "https://github.com/deepmanifold/career-growth-analytics"
-Repository = "https://github.com/deepmanifold/career-growth-analytics"
 
 [tool.setuptools.packages.find]
 where = ["src"]

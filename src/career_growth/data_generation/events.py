@@ -15,7 +15,7 @@ from career_growth import config
 # Each tuple is (intercept, ie_coef, pf_coef, cu_coef, intent_coef, device_coef, stage_coef)
 CORE_EVENT_LOGIT_PARAMS: dict[str, tuple[float, float, float, float, float, float, float]] = {
     "onboarding_start": (-0.60, 0.50, 0.30, 0.20, 0.20, 0.10, 0.10),
-    "onboarding_complete": (-2.00, 1.80, 1.30, 0.70, 0.45, 0.25, 0.15),
+    "onboarding_complete": (-2.20, 1.80, 1.30, 0.70, 0.45, 0.25, 0.15),
     "profile_complete": (-1.50, 1.50, 0.40, 1.00, 0.35, 0.25, 0.15),
     "resume_upload": (-2.20, 1.30, 0.25, 1.30, 0.25, 0.25, 0.08),
     "job_recommendation_view": (-1.70, 1.20, 1.00, 0.25, 0.25, 0.15, 0.08),
@@ -40,7 +40,7 @@ MILESTONE_DAY_RANGES: dict[str, tuple[int, int]] = {
 # Positive bonus if prerequisite occurred; negative penalty if it did not.
 STATE_BONUSES: dict[str, dict[str, tuple[float, float]]] = {
     "onboarding_complete": {"onboarding_start": (0.0, -3.0)},
-    "profile_complete": {"onboarding_start": (0.10, -0.80), "onboarding_complete": (0.50, -1.50)},
+    "profile_complete": {"onboarding_start": (0.10, -0.80), "onboarding_complete": (0.25, -1.50)},
     "resume_upload": {"onboarding_start": (0.05, -0.80), "profile_complete": (0.80, -0.80)},
     "job_recommendation_view": {"onboarding_start": (0.05, -0.60), "resume_upload": (0.50, -0.60)},
     "job_save": {"onboarding_start": (0.05, -0.50), "job_recommendation_view": (0.40, -0.50)},
@@ -76,7 +76,7 @@ def _sigmoid(x: float) -> float:
 def _event_probability(
     params: tuple[float, float, float, float, float, float, float],
     row: pd.Series,
-    variant_effect: float,
+    direct_effect: float,
     state_bonus: float = 0.0,
 ) -> float:
     intercept, ie_coef, pf_coef, cu_coef, intent_coef, device_coef, stage_coef = params
@@ -88,7 +88,7 @@ def _event_probability(
         + intent_coef * row["intent_score"]
         + device_coef * row["device_score"]
         + stage_coef * row["career_stage_score"]
-        + variant_effect
+        + direct_effect
         + state_bonus
     )
     return float(np.clip(_sigmoid(logit), 0.01, 0.99))
@@ -110,7 +110,11 @@ def _generate_milestones(
     variant_effect: float,
     rng: np.random.Generator,
 ) -> dict[str, datetime]:
-    """Decide which core milestones occur and assign timestamps."""
+    """Decide which core milestones occur and assign timestamps.
+
+    The onboarding treatment only directly affects onboarding events.
+    Downstream effects emerge from the user state and funnel prerequisites.
+    """
     milestones: dict[str, datetime] = {}
     occurred: set[str] = set()
 
@@ -128,7 +132,9 @@ def _generate_milestones(
             else:
                 state_bonus += penalty
 
-        probability = _event_probability(params, row, variant_effect, state_bonus)
+        # Direct treatment effect is applied only to onboarding events.
+        direct_effect = variant_effect if event_name in {"onboarding_start", "onboarding_complete"} else 0.0
+        probability = _event_probability(params, row, direct_effect, state_bonus)
         if rng.random() < probability:
             low, high = MILESTONE_DAY_RANGES[event_name]
             # Shift day forward if a prerequisite occurred later than the default low bound.
@@ -145,7 +151,6 @@ def _generate_milestones(
 
 def _daily_activity_probability(
     row: pd.Series,
-    variant_effect: float,
     onboarding_complete: bool,
     num_core_actions: int,
     late_phase: bool,
@@ -161,14 +166,13 @@ def _daily_activity_probability(
         + 0.20 * pf
         + 0.15 * cu
         + 0.10 * intent
-        + 0.05 * variant_effect
     )
     if late_phase:
         state_boost = 0.015 * num_core_actions
         late_p = 0.001 + 0.08 * engagement_score + state_boost
         return float(np.clip(late_p, 0.001, 0.25))
 
-    first_week_p = 0.01 + 0.50 * engagement_score + 0.06 * onboarding_flag
+    first_week_p = 0.01 + 0.50 * engagement_score + 0.05 * onboarding_flag
     return float(np.clip(first_week_p, 0.005, 0.60))
 
 
@@ -213,6 +217,7 @@ def generate_events_for_user(
     user_id = row["user_id"]
     event_counter = 0
     session_counter = 0
+    job_counter = 0
 
     def next_event_id() -> str:
         nonlocal event_counter
@@ -223,6 +228,11 @@ def generate_events_for_user(
         nonlocal session_counter
         session_counter += 1
         return str(uuid.uuid5(uuid.NAMESPACE_OID, f"session-{seed}-{user_id}-{session_counter}"))
+
+    def next_job_id() -> str:
+        nonlocal job_counter
+        job_counter += 1
+        return str(uuid.uuid5(uuid.NAMESPACE_OID, f"job-{seed}-{user_id}-{job_counter}"))
 
     # Event queue: (timestamp, sort_order, event_name, event_source, properties, page_name, session_id)
     event_queue: list[tuple] = []
@@ -244,7 +254,7 @@ def generate_events_for_user(
     for event_name, ts in milestones.items():
         props: dict[str, Any] = {"variant_id": variant_id}
         if event_name == "job_save":
-            props["job_id"] = str(uuid.uuid4())
+            props["job_id"] = next_job_id()
         if event_name == "growth_task_complete":
             props["task_type"] = rng.choice(["skill_assessment", "resume_review", "mock_interview"])
         event_queue.append(
@@ -263,7 +273,7 @@ def generate_events_for_user(
     active_days_first_week: set[int] = set()
     for day_offset in range(0, config.PREDICTION_CUTOFF_DAY + 1):
         p_active = _daily_activity_probability(
-            row, variant_effect, onboarding_complete, num_core_actions, late_phase=False
+            row, onboarding_complete, num_core_actions, late_phase=False
         )
         if rng.random() < p_active or (
             day_offset in {int((ts - signup).days) for ts in milestones.values()}
@@ -316,10 +326,10 @@ def generate_events_for_user(
     # Daily activity for days 8-21 (label window).
     for day_offset in range(config.LABEL_WINDOW_START_DAY, config.LABEL_WINDOW_END_DAY + 1):
         p_active = _daily_activity_probability(
-            row, variant_effect, onboarding_complete, num_core_actions, late_phase=True
+            row, onboarding_complete, num_core_actions, late_phase=True
         )
         if rng.random() < p_active:
-            session_id = str(uuid.uuid4())
+            session_id = next_session_id()
             session_time = _random_time_on_day(signup, day_offset, rng)
             event_queue.append(
                 (

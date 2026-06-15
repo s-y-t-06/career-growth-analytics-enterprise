@@ -45,30 +45,7 @@ def generate_all_data(
         all_events.extend(user_events)
     events = pd.DataFrame(all_events)
 
-    # 4. Interventions.
-    interventions = generate_interventions(users, events, rng)
-
-    # 5. Update experiment conversions (onboarding completion).
-    onboarding_users = set(
-        events[
-            (events["event_name"] == "onboarding_complete")
-            & (events["event_source"] == "user_action")
-        ]["user_id"]
-    )
-    experiment_assignments["is_converted"] = experiment_assignments["user_id"].isin(
-        onboarding_users
-    )
-
-    # 6. Labels.
-    labels = build_labels(users, events)
-
-    # 7. Persist.
-    sample_dir = Path(output_dir) / "sample"
-    processed_dir = Path(output_dir) / "processed"
-    sample_dir.mkdir(parents=True, exist_ok=True)
-    processed_dir.mkdir(parents=True, exist_ok=True)
-
-    # Users: drop hidden propensity columns before saving.
+    # Users: drop hidden propensity columns before saving or passing downstream.
     hidden_cols = [
         "intrinsic_engagement",
         "career_urgency",
@@ -79,6 +56,29 @@ def generate_all_data(
         "device_score",
     ]
     users_public = users.drop(columns=hidden_cols)
+
+    # 4. Labels (must be built before interventions so win-back logic is consistent).
+    labels = build_labels(users, events)
+
+    # 5. Interventions.
+    interventions = generate_interventions(users_public, events, labels, rng, seed=seed)
+
+    # 6. Update experiment conversions (onboarding completion).
+    onboarding_users = set(
+        events[
+            (events["event_name"] == "onboarding_complete")
+            & (events["event_source"] == "user_action")
+        ]["user_id"]
+    )
+    experiment_assignments["is_converted"] = experiment_assignments["user_id"].isin(
+        onboarding_users
+    )
+
+    # 7. Persist.
+    sample_dir = Path(output_dir) / "sample"
+    processed_dir = Path(output_dir) / "processed"
+    sample_dir.mkdir(parents=True, exist_ok=True)
+    processed_dir.mkdir(parents=True, exist_ok=True)
 
     users_public.to_csv(sample_dir / "users.csv", index=False)
     events.to_csv(sample_dir / "events.csv", index=False)

@@ -1,16 +1,48 @@
 """Tests for the synthetic data generation pipeline."""
 
+import hashlib
+from pathlib import Path
+
+import pandas as pd
+import pytest
+
 from career_growth import config
 from career_growth.data_generation.generator import generate_all_data
 
 
-def test_generation_reproducibility():
-    data_a = generate_all_data(count=200, seed=123, output_dir="data_test_a")
-    data_b = generate_all_data(count=200, seed=123, output_dir="data_test_b")
+CSV_FILES = [
+    "sample/users.csv",
+    "sample/events.csv",
+    "sample/experiment_assignments.csv",
+    "sample/interventions.csv",
+    "processed/labels.csv",
+]
 
-    assert list(data_a["users"]["user_id"]) == list(data_b["users"]["user_id"])
-    assert data_a["events"].shape == data_b["events"].shape
-    assert data_a["events"]["event_id"].tolist() == data_b["events"]["event_id"].tolist()
+
+def _file_hash(path: Path) -> str:
+    return hashlib.md5(path.read_bytes()).hexdigest()
+
+
+def test_generation_reproducibility(tmp_path):
+    """Same seed must produce byte-identical CSV outputs."""
+    dir_a = tmp_path / "a"
+    dir_b = tmp_path / "b"
+    generate_all_data(count=200, seed=123, output_dir=str(dir_a))
+    generate_all_data(count=200, seed=123, output_dir=str(dir_b))
+
+    for relative in CSV_FILES:
+        path_a = dir_a / relative
+        path_b = dir_b / relative
+        assert path_a.exists(), f"Missing file: {path_a}"
+        assert path_b.exists(), f"Missing file: {path_b}"
+        assert _file_hash(path_a) == _file_hash(path_b), (
+            f"{relative} differs between reproducibility runs"
+        )
+
+    # Also compare full DataFrames after round-trip for one key file.
+    users_a = pd.read_csv(dir_a / "sample/users.csv")
+    users_b = pd.read_csv(dir_b / "sample/users.csv")
+    pd.testing.assert_frame_equal(users_a, users_b)
 
 
 def test_users_schema_and_no_hidden_variables(synthetic_data):
@@ -67,3 +99,36 @@ def test_active_events_only_for_label(synthetic_data):
         & (synthetic_data["events"]["event_timestamp"] <= label_end)
     ]
     assert len(active_events) == 0
+
+
+def test_intervention_win_back_targets_churned(synthetic_data):
+    """Win-back interventions must only be sent to churned users."""
+    interventions = synthetic_data["interventions"]
+    labels = synthetic_data["labels"]
+
+    merged = interventions.merge(labels[["user_id", "is_churned"]], on="user_id")
+    win_backs = merged[merged["action_name"] == "send_win_back"]
+
+    assert len(win_backs) > 0, "expected at least one win-back intervention"
+    assert (win_backs["is_churned"] == 1).all(), (
+        "win-back sent to retained user(s)"
+    )
+
+    retained_users = set(labels[labels["is_churned"] == 0]["user_id"])
+    retained_win_backs = interventions[
+        (interventions["action_name"] == "send_win_back")
+        & (interventions["user_id"].isin(retained_users))
+    ]
+    assert len(retained_win_backs) == 0
+
+
+def test_intervention_reproducibility(tmp_path):
+    """Intervention records must be deterministic for a fixed seed."""
+    dir_a = tmp_path / "a"
+    dir_b = tmp_path / "b"
+    generate_all_data(count=200, seed=7, output_dir=str(dir_a))
+    generate_all_data(count=200, seed=7, output_dir=str(dir_b))
+
+    interventions_a = pd.read_csv(dir_a / "sample/interventions.csv")
+    interventions_b = pd.read_csv(dir_b / "sample/interventions.csv")
+    pd.testing.assert_frame_equal(interventions_a, interventions_b)

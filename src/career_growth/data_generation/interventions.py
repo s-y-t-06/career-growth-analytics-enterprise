@@ -1,8 +1,8 @@
 """Synthetic intervention log generation.
 
 Interventions are secondary data and do not influence the churn label or the
-main event stream. They are generated after the fact to simulate a simple
-campaign system.
+main event stream. They are generated after labels are computed so that win-back
+campaigns target only users who are truly churned under the label definition.
 """
 
 import uuid
@@ -17,9 +17,19 @@ from career_growth import config
 def generate_interventions(
     users: pd.DataFrame,
     events: pd.DataFrame,
+    labels: pd.DataFrame,
     rng: np.random.Generator,
+    seed: int = config.RANDOM_SEED,
 ) -> pd.DataFrame:
-    """Generate a small set of marketing interventions based on user behavior."""
+    """Generate a small set of marketing interventions based on user behavior.
+
+    Args:
+        users: users DataFrame (may be the public version without hidden columns).
+        events: events DataFrame.
+        labels: labels DataFrame with ``is_churned`` for each user.
+        rng: random number generator.
+        seed: generation seed used for deterministic ID derivation.
+    """
     if events.empty:
         return pd.DataFrame(
             columns=[
@@ -35,10 +45,22 @@ def generate_interventions(
             ]
         )
 
+    churned_by_user = labels.set_index("user_id")["is_churned"].to_dict()
     user_actions = events[events["event_source"] == "user_action"].copy()
-    user_last_action = user_actions.groupby("user_id")["event_timestamp"].max()
 
     rows = []
+    message_counter = 0
+
+    def next_message_id(user_id: str) -> str:
+        nonlocal message_counter
+        message_counter += 1
+        return str(
+            uuid.uuid5(
+                uuid.NAMESPACE_OID,
+                f"intervention-{seed}-{user_id}-{message_counter}",
+            )
+        )
+
     for _, user in users.iterrows():
         user_id = user["user_id"]
         signup = user["signup_timestamp"]
@@ -66,6 +88,7 @@ def generate_interventions(
             channel = "in_app" if not consent else rng.choice(["email", "push", "in_app"])
             rows.append(
                 _build_intervention_row(
+                    next_message_id(user_id),
                     user_id,
                     "complete_onboarding",
                     channel,
@@ -81,6 +104,7 @@ def generate_interventions(
             channel = "in_app" if not consent else rng.choice(["email", "push"])
             rows.append(
                 _build_intervention_row(
+                    next_message_id(user_id),
                     user_id,
                     "send_reengagement_message",
                     channel,
@@ -88,17 +112,19 @@ def generate_interventions(
                     rng,
                 )
             )
+            continue
 
         # Rule 3: churned users after label window -> win-back.
-        last_action = user_last_action.get(user_id)
-        label_end = signup + timedelta(days=config.LABEL_WINDOW_END_DAY)
-        if last_action is not None and last_action <= label_end:
+        # Use the official churn label instead of a loose last-action heuristic.
+        if churned_by_user.get(user_id, 0) == 1:
+            label_end = signup + timedelta(days=config.LABEL_WINDOW_END_DAY)
             send_time = label_end + timedelta(days=1)
             channel = "in_app" if not consent else rng.choice(["email", "push"])
             rows.append(
                 _build_intervention_row(
+                    next_message_id(user_id),
                     user_id,
-                    "send_reengagement_message",
+                    "send_win_back",
                     channel,
                     send_time,
                     rng,
@@ -109,13 +135,13 @@ def generate_interventions(
 
 
 def _build_intervention_row(
+    message_id: str,
     user_id: str,
     action_name: str,
     channel: str,
     send_time: pd.Timestamp,
     rng: np.random.Generator,
 ) -> dict:
-    message_id = str(uuid.uuid4())
     open_time = send_time + timedelta(hours=int(rng.integers(1, 48))) if rng.random() < 0.20 else None
     click_time = (
         open_time + timedelta(minutes=int(rng.integers(1, 60)))

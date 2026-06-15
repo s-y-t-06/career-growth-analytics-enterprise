@@ -1,6 +1,6 @@
 # Career Growth Analytics
 
-AI Career Platform Lifecycle Growth and Experimentation System — MVP.
+AI Career Platform Lifecycle Growth and Experimentation System -- MVP.
 
 This repository contains the minimum viable product for analyzing user lifecycle growth in an AI-powered career planning and job recommendation product. It generates a realistic synthetic event stream, validates data quality, computes growth funnels and cohort retention, analyzes an onboarding A/B experiment, and produces rule-based Next Best Action recommendations.
 
@@ -28,14 +28,14 @@ Core user journey:
 
 ```
 signup
-→ onboarding_complete
-→ profile_complete
-→ resume_upload
-→ job_recommendation_view
-→ job_save
-→ growth_task_complete
-→ career_report_generate
-→ retained / churned
+-> onboarding_complete
+-> profile_complete
+-> resume_upload
+-> job_recommendation_view
+-> job_save
+-> growth_task_complete
+-> career_report_generate
+-> retained / churned
 ```
 
 ## Repository Structure
@@ -52,7 +52,9 @@ career-growth-analytics/
 │   └── lifecycle_analysis.ipynb   # End-to-end exploratory analysis
 ├── scripts/
 │   ├── generate_data.py       # CLI to regenerate synthetic data
-│   └── run_analysis.py        # CLI to run validation and analytics
+│   ├── run_analysis.py        # CLI to run validation and analytics
+│   ├── compute_summary.py     # CLI to print a concise summary
+│   └── build_notebook.py      # CLI to execute the notebook from the command line
 ├── src/career_growth/
 │   ├── config.py              # Project constants and experiment definitions
 │   ├── schemas.py             # Pydantic row-level schemas
@@ -85,28 +87,31 @@ No external APIs, payment gateways, or cloud services are used. All data is gene
 
 Create and activate a virtual environment, then install the package in editable mode:
 
+```powershell
+python -m venv .venv
+.venv\Scripts\activate
+pip install -e ".[dev]"
+```
+
+On macOS or Linux:
+
 ```bash
 python -m venv .venv
-# Windows
-.venv\Scripts\activate
-# macOS / Linux
 source .venv/bin/activate
-
 pip install -e ".[dev]"
 ```
 
 ## Generate Data
 
-To regenerate the synthetic dataset with the default 5,000 users and fixed seed:
+The repository includes a small sample dataset (1,000 users) under `data/sample/`. To regenerate it, or to generate a larger dataset locally, run:
 
-```bash
-python scripts/generate_data.py
-```
-
-To generate a different size:
-
-```bash
+```powershell
+# Regenerate the sample dataset
+$env:PYTHONPATH = "src"
 python scripts/generate_data.py --count 1000 --seed 42
+
+# Generate the full 5,000-user dataset used for stable analytics
+python scripts/generate_data.py --count 5000 --seed 42
 ```
 
 Generated files:
@@ -119,9 +124,10 @@ Generated files:
 
 ## Run Analytics
 
-After generating data, run the full analytics pipeline from the command line:
+After generating data, run the full analytics pipeline from the project root:
 
-```bash
+```powershell
+$env:PYTHONPATH = "src"
 python scripts/run_analysis.py
 ```
 
@@ -129,14 +135,23 @@ This executes validation, funnel, retention, cohort, experiment, and Next Best A
 
 ## Run Tests
 
-```bash
+```powershell
+$env:PYTHONPATH = "src"
 python -m pytest tests -q
 ```
 
 ## Open Notebook
 
-```bash
+```powershell
+$env:PYTHONPATH = "src"
 jupyter notebook notebooks/lifecycle_analysis.ipynb
+```
+
+To execute the notebook non-interactively:
+
+```powershell
+$env:PYTHONPATH = "src"
+python scripts/build_notebook.py
 ```
 
 ## Churn Label Definition
@@ -150,11 +165,13 @@ jupyter notebook notebooks/lifecycle_analysis.ipynb
 
 `exp_onboarding_v1` compares three onboarding flows:
 
-- `control` — standard five-step onboarding (40%)
-- `personalized` — adaptive onboarding (30%)
-- `simplified` — two-step onboarding (30%)
+- `control` -- standard five-step onboarding (40%)
+- `personalized` -- adaptive onboarding (30%)
+- `simplified` -- two-step onboarding (30%)
 
 Primary metrics: onboarding completion rate, profile completion rate, D7 retention rate.
+
+The treatment effects are injected into the synthetic data through a causal mechanism: the onboarding variants directly influence onboarding completion (and the preceding onboarding start), and any downstream lift in profile completion, resume upload, or retention emerges from the resulting user state and funnel progression. This is a synthetic demonstration, not a claim about real product performance.
 
 ## Design Decisions
 
@@ -162,4 +179,4 @@ See `docs/methodology.md` for the full generative causal order, probability form
 
 ## License
 
-MIT License — see `LICENSE`.
+MIT License -- see `LICENSE`.

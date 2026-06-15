@@ -53,7 +53,7 @@ Let
 - `intent = encoded user_intent_level`
 - `device = encoded device_type`
 - `stage = encoded career_stage`
-- `variant_effect` = `0.0` for `control`, `0.6` for `personalized`, `0.4` for `simplified`
+- `direct_effect` = treatment-specific effect applied to `onboarding_start` and `onboarding_complete`; `0.0` for `control`, `0.30` for `personalized`, `0.15` for `simplified`
 
 The probability of each core event is computed with a clipped logistic function:
 
@@ -65,7 +65,7 @@ logit(p) = intercept
            + coefficient_intent * intent
            + coefficient_device * device
            + coefficient_stage * stage
-           + variant_effect
+           + direct_effect
            + state_bonus
 
 p = clip(sigmoid(logit(p)), 0.01, 0.99)
@@ -90,15 +90,12 @@ If an upstream event does not occur, the downstream event can still occur with a
 For each day `d` in `[0, 7]`:
 
 ```
-base_activity = 0.05
-                + 0.35 * ie
-                + 0.20 * pf
-                + 0.15 * cu
-                + 0.10 * intent
-                + 0.05 * variant_effect
-                + 0.08 * onboarding_complete
+engagement_score = 0.30 * ie
+                   + 0.20 * pf
+                   + 0.15 * cu
+                   + 0.10 * intent
 
-p_active_d = clip(base_activity, 0.02, 0.90)
+p_active_d = clip(0.01 + 0.50 * engagement_score + 0.05 * onboarding_complete, 0.005, 0.60)
 ```
 
 If the day is active, a `session_start` is generated, followed by a random subset of contextually appropriate user actions (for example, `job_detail_view`, `ai_assistant_interaction`, `return_visit`).
@@ -108,23 +105,25 @@ If the day is active, a `session_start` is generated, followed by a random subse
 For each day `d` in `[8, 21]`:
 
 ```
-retention_boost = 0.05 * num_core_actions_completed
-late_activity = base_activity * 0.70 + retention_boost
-p_active_d = clip(late_activity, 0.01, 0.80)
+state_boost = 0.015 * num_core_actions_completed
+p_active_d = clip(0.001 + 0.08 * engagement_score + state_boost, 0.001, 0.25)
 ```
 
 `num_core_actions_completed` counts `onboarding_complete`, `profile_complete`, `resume_upload`, `job_recommendation_view`, `job_save`, `growth_task_complete`, `career_report_generate`.
 
 A user who completed more core actions in the first week has a higher chance of remaining active in the label window.
 
-## 7. Treatment effect injection
+## 7. Treatment effect injection (synthetic causal mechanism)
 
-The onboarding experiment affects:
+The onboarding experiment is a synthetic demonstration. It does not reflect a real business outcome; it is calibrated only to exercise the analytics pipeline.
 
-- `onboarding_complete` probability directly through `variant_effect`.
-- First-week daily activity through a small boost (`+0.05 * variant_effect`).
+The treatment is injected as follows:
 
-This creates a realistic but bounded treatment effect: personalized onboarding improves completion without making churn impossible.
+- `direct_effect` is applied only to `onboarding_start` and `onboarding_complete`. Current values are `0.0` for `control`, `0.30` for `personalized`, and `0.15` for `simplified`.
+- No direct treatment effect is added to `profile_complete`, `resume_upload`, `job_save`, `career_report_generate`, or to late-phase retention.
+- Downstream lifts in profile completion, resume upload, job interactions, and retention emerge indirectly because completing onboarding increases the state bonuses that govern later events and because completers are more likely to remain active during the first week.
+
+This design keeps the primary treatment localized to the onboarding step while allowing the funnel and retention metrics to move through user-state mediation.
 
 ## 8. Noise and anomalies
 

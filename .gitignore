@@ -23,7 +23,10 @@ share/python-wheels/
 *.egg
 MANIFEST
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
 .coverage
+.coverage.*
 htmlcov/
 .tox/
 .venv/
@@ -45,10 +48,9 @@ env/
 .DS_Store
 Thumbs.db
 
-# Data artifacts (keep sample data under version control, exclude large processed outputs)
-data/processed/*.parquet
-data/processed/*.feather
-data/processed/*.h5
+# Data artifacts
+# Small sample CSVs under data/sample are kept for demonstration.
+data_tmp_grid/
 data_test_*/
 *.log
 
