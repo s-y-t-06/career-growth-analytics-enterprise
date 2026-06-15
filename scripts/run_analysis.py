@@ -1,4 +1,4 @@
-"""运行完整 MVP 分析管道的 CLI 脚本。"""
+"""CLI script to run the full MVP analytics pipeline."""
 
 import json
 
@@ -25,7 +25,7 @@ def main() -> None:
     )
     labels = pd.read_csv("data/processed/labels.csv", parse_dates=["label_start", "label_end"])
 
-    # 数据验证。
+    # Validation.
     validator = DataValidator("data")
     validator.users = users
     validator.events = events
@@ -39,12 +39,12 @@ def main() -> None:
     if report.warnings:
         print("Warnings:", report.warnings)
 
-    # 漏斗。
+    # Funnel.
     funnel = compute_funnel(users, events)
     print("\n=== Core Funnel ===")
     print(funnel.to_string(index=False))
 
-    # 留存。
+    # Retention.
     print("\n=== Retention ===")
     for day in [1, 7, 14]:
         rate = compute_day_retention(users, events, day)["retention_rate"].iloc[0]
@@ -52,17 +52,17 @@ def main() -> None:
     rolling = compute_rolling_retention(users, events, PREDICTION_CUTOFF_DAY)
     print(f"D{PREDICTION_CUTOFF_DAY} rolling retention: {rolling:.2%}")
 
-    # 按注册周划分的同群留存。
+    # Cohort retention by signup week.
     cohort_retention = compute_cohort_retention(users, events, days=[1, 7, 14])
     print("\n=== Cohort Retention (signup week) ===")
     print(cohort_retention.to_string(index=False))
 
-    # 实验分析。
+    # Experiment analysis.
     experiment_results = analyze_experiment(users, events, experiment_assignments, ONBOARDING_EXPERIMENT_ID)
     print("\n=== Experiment Analysis ===")
     print(json.dumps(experiment_results, indent=2, default=str))
 
-    # 下一个最佳动作示例。
+    # Next best action sample.
     sample_users = users.sample(5, random_state=42)
     print("\n=== Next Best Action Sample ===")
     for _, user in sample_users.iterrows():

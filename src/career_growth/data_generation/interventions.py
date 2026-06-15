@@ -1,7 +1,8 @@
-"""合成干预日志生成。
+"""Synthetic intervention log generation.
 
-干预是次要数据，不会影响流失标签或主事件流。
-它们在标签计算完成后生成，以便挽回活动仅针对在标签定义下真正流失的用户。
+Interventions are secondary data and do not influence the churn label or the
+main event stream. They are generated after labels are computed so that win-back
+campaigns target only users who are truly churned under the label definition.
 """
 
 import uuid
@@ -20,14 +21,14 @@ def generate_interventions(
     rng: np.random.Generator,
     seed: int = config.RANDOM_SEED,
 ) -> pd.DataFrame:
-    """基于用户行为生成少量营销干预。
+    """Generate a small set of marketing interventions based on user behavior.
 
     Args:
-        users: 用户 DataFrame（可以是不包含隐藏列的公开版本）。
-        events: 事件 DataFrame。
-        labels: 包含每个用户 ``is_churned`` 的标签 DataFrame。
-        rng: 随机数生成器。
-        seed: 用于确定性派生 ID 的生成种子。
+        users: users DataFrame (may be the public version without hidden columns).
+        events: events DataFrame.
+        labels: labels DataFrame with ``is_churned`` for each user.
+        rng: random number generator.
+        seed: generation seed used for deterministic ID derivation.
     """
     if events.empty:
         return pd.DataFrame(
@@ -81,7 +82,7 @@ def generate_interventions(
             > 0
         )
 
-        # 规则 1：第 3 天仍未完成新手引导 -> 提示完成新手引导。
+        # Rule 1: incomplete onboarding by day 3 -> prompt to complete onboarding.
         if not onboarding_done:
             send_time = signup + timedelta(days=3)
             channel = "in_app" if not consent else rng.choice(["email", "push", "in_app"])
@@ -97,7 +98,7 @@ def generate_interventions(
             )
             continue
 
-        # 规则 2：首周活跃度低 -> 再互动。
+        # Rule 2: low engagement in first week -> reengagement.
         if len(active_days_first_week) <= 1:
             send_time = signup + timedelta(days=7)
             channel = "in_app" if not consent else rng.choice(["email", "push"])
@@ -113,8 +114,8 @@ def generate_interventions(
             )
             continue
 
-        # 规则 3：标签窗口后的流失用户 -> 挽回。
-        # 使用官方流失标签，而不是宽松的最后行为启发式。
+        # Rule 3: churned users after label window -> win-back.
+        # Use the official churn label instead of a loose last-action heuristic.
         if churned_by_user.get(user_id, 0) == 1:
             label_end = signup + timedelta(days=config.LABEL_WINDOW_END_DAY)
             send_time = label_end + timedelta(days=1)

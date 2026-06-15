@@ -85,10 +85,10 @@ No external APIs, payment gateways, or cloud services are used. All data is gene
 
 ## Installation
 
-Create and activate a virtual environment in the repository root, then install the package in editable mode:
+Create and activate a virtual environment in the repository root using a real CPython interpreter (not a Windows Store alias), then install the package in editable mode:
 
 ```powershell
-python -m venv .venv
+C:\Path\To\Real\python.exe -m venv .venv
 .venv\Scripts\activate
 .venv\Scripts\python.exe -m pip install -e ".[dev]"
 ```
@@ -96,12 +96,18 @@ python -m venv .venv
 On macOS or Linux:
 
 ```bash
-python -m venv .venv
+/path/to/real/python -m venv .venv
 source .venv/bin/activate
 .venv/bin/python -m pip install -e ".[dev]"
 ```
 
 The `.venv/` directory is ignored by Git (see `.gitignore`). Using the virtual environment's interpreter avoids relying on the Windows Store Python shim, which cannot be invoked by absolute path in a fresh terminal.
+
+Verified base interpreter for this repository:
+
+```text
+C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows-x86_64-none\python.exe
+```
 
 ## Generate Data
 

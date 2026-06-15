@@ -1,4 +1,4 @@
-"""生成合成 MVP 数据集的 CLI 脚本。"""
+"""CLI script to generate the synthetic MVP dataset."""
 
 import argparse
 
@@ -8,25 +8,25 @@ from career_growth.data_generation.generator import generate_all_data
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="生成 AI Career Growth Analytics MVP 的合成数据。"
+        description="Generate synthetic data for the AI Career Growth Analytics MVP."
     )
     parser.add_argument(
         "--count",
         type=int,
         default=config.DEFAULT_USER_COUNT,
-        help="要生成的合成用户数量。",
+        help="Number of synthetic users to generate.",
     )
     parser.add_argument(
         "--seed",
         type=int,
         default=config.RANDOM_SEED,
-        help="用于可复现性的随机种子。",
+        help="Random seed for reproducibility.",
     )
     parser.add_argument(
         "--output-dir",
         type=str,
         default="data",
-        help="写入生成数据的目录。",
+        help="Directory to write generated data.",
     )
     args = parser.parse_args()
 

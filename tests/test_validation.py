@@ -1,4 +1,4 @@
-"""数据验证模块的测试。"""
+"""Tests for the data validation module."""
 
 import pytest
 

@@ -2,11 +2,19 @@
 
 ## 1. Python executable
 
+Base interpreter used to create the virtual environment:
+
+```text
+C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows_x86_64-none\python.exe
+```
+
+Project virtual environment interpreter:
+
 ```text
 C:\Users\Administrator\Desktop\career-growth-analytics\.venv\Scripts\python.exe
 ```
 
-说明：原报告中记录的 Windows Store Python 路径是 0 字节重定向器，无法在新终端直接按绝对路径执行。本次补充整改在仓库根目录创建本地虚拟环境 `.venv`，并使用该环境中的解释器完成所有验证。`.venv/` 已加入 `.gitignore`，不会被提交。
+Note: The Windows Store Python path recorded in the original report is a 0-byte reparse point/alias and cannot be invoked directly by absolute path in a fresh terminal. The final remediation installed a real CPython 3.11.15 via `uv`, recreated `.venv` from that interpreter, and completed all verification using the virtual environment executable. The `.venv/` directory is listed in `.gitignore` and is not committed.
 
 ## 2. Modified files
 
@@ -17,7 +25,7 @@ C:\Users\Administrator\Desktop\career-growth-analytics\.venv\Scripts\python.exe
 - `src/career_growth/data_generation/interventions.py`
 - `src/career_growth/analytics/retention.py`
 - `src/career_growth/analytics/experiments.py`
-- 全部源码/脚本/测试文件的注释与 docstring 已中文化（未改动代码逻辑与业务字符串）
+- All source/script/test comments and docstrings are written in professional English; code logic and business strings were not changed
 
 ### Tests
 - `tests/conftest.py`
@@ -100,16 +108,16 @@ C:\Users\Administrator\Desktop\career-growth-analytics\.venv\Scripts\python.exe
 
 ### 4.1 Install and generate data
 
-创建并激活本地虚拟环境后安装依赖：
+Create the virtual environment from a real CPython interpreter and install dependencies:
 
 ```powershell
 cd C:\Users\Administrator\Desktop\career-growth-analytics
-python -m venv .venv
+C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows_x86_64-none\python.exe -m venv .venv
 .venv\Scripts\activate
 .venv\Scripts\python.exe -m pip install -e ".[dev]"
 ```
 
-生成 sample 数据：
+Generate the sample dataset:
 
 ```powershell
 $env:PYTHONPATH = "src"
@@ -263,7 +271,7 @@ Commit after remediation:
 157acdf Phase 1 remediation: reproducibility, retention, SRM, interventions, realism, docs, cleanup
 ```
 
-补充整改提交（环境可复验 + 注释中文化）待本次任务完成后记录。
+Final remediation commit (real CPython environment + restored English comments) recorded after this task.
 
 ## 7. Remaining risks and limitations
 

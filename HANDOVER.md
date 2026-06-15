@@ -8,21 +8,18 @@
 - **MVP 仓库**：`C:\Users\Administrator\Desktop\career-growth-analytics`
 - **项目名**：Career Growth Analytics
 - **业务场景**：AI Career Platform 用户生命周期增长与实验优化系统
-- **当前阶段**：Phase 1 整改已完成，等待 Codex 最终验收
+- **当前阶段**：Phase 1 最终整改已完成，等待 Codex 最终验收
 - **严格约束**：**不得开始 Phase 2（模型训练、API、数据库、前端开发）**，必须等 Codex 审批
 - **合规要求**：不得使用任何 lychas 相关代码、数据或命名
 
 ## 2. 当前 git 状态
 
 ```text
-465e9ed docs: update HANDOVER.md to avoid self-referential HEAD hash
-3bad450 docs: add HANDOVER.md for next AI session
-39f49d7 docs: record final remediation commit hash in report
 157acdf Phase 1 remediation: reproducibility, retention, SRM, interventions, realism, docs, cleanup
 74bc006 Phase 1 MVP final: add executed notebook, docs and scripts
 ```
 
-当前工作目录有未提交修改：README.md、HANDOVER.md 及源码注释中文化。本次任务完成后将统一提交。
+当前工作目录有未提交修改：README.md、HANDOVER.md、PHASE1_REMEDIATION_REPORT.md、源码注释恢复英文、__init__.py 文件清理。本次任务完成后将统一提交。
 
 ## 3. 已完成的整改内容（Phase 1 Remediation）
 
@@ -41,7 +38,7 @@
 | Notebook 可执行 | 完成 | `notebooks/lifecycle_analysis.ipynb` |
 | 验收报告 | 完成 | `PHASE1_REMEDIATION_REPORT.md` |
 | 本地 .venv 环境可用，命令可复验 | 完成 | `.venv/`（已加入 `.gitignore`），`README.md` 已更新 |
-| 源码/脚本/测试注释中文化 | 完成 | 全部 24 个 Python 文件 |
+| 源码/脚本/测试注释恢复专业英文 | 完成 | 全部 24 个 Python 文件；非 ASCII 扫描结果为 0 |
 
 ### 当前关键校准参数
 
@@ -64,10 +61,11 @@ ONBOARDING_VARIANTS = [
 
 ### 当前 Python 环境
 
-- 真实可用解释器：仓库本地虚拟环境 `.venv\Scripts\python.exe`
-- 解释器版本：Python 3.11.9
+- 真实基础解释器：`C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows_x86_64-none\python.exe`（通过 `uv` 安装的 CPython 3.11.15）
+- 项目虚拟环境解释器：`.venv\Scripts\python.exe`
+- 解释器版本：Python 3.11.15
 - 依赖安装方式：`.venv\Scripts\python.exe -m pip install -e ".[dev]"`
-- 注意：Windows Store 的 `python.exe` 路径（`C:\Users\Administrator\AppData\Local\Microsoft\WindowsApps\...`）是 0 字节重定向器，无法在新终端直接按绝对路径调用；因此统一使用 `.venv` 中的解释器。
+- 注意：Windows Store 的 `python.exe` 路径（`C:\Users\Administrator\AppData\Local\Microsoft\WindowsApps\...`）是 0 字节重定向器，无法在新终端直接按绝对路径调用；因此必须使用真实 CPython 创建 `.venv`。
 
 ### 当前测试状态
 
@@ -81,7 +79,7 @@ $env:PYTHONPATH = "src"
 
 ```text
 ============================= test session starts =============================
-platform win32 -- Python 3.11.9, pytest-9.1.0, pluggy-1.6.0
+platform win32 -- Python 3.11.15, pytest-9.1.0, pluggy-1.6.0
 rootdir: C:\Users\Administrator\Desktop\career-growth-analytics
 configfile: pyproject.toml
 testpaths: tests
@@ -93,7 +91,7 @@ tests\test_decisions.py ..
 tests\test_features.py ...
 tests\test_validation.py ....
 
-============================= 29 passed in 53.06s =============================
+============================= 29 passed in 46.70s =============================
 ```
 
 ### 当前数据状态
@@ -255,9 +253,10 @@ $env:PYTHONPATH = "src"
 
 ## 7. 尚未解决的风险
 
-- D7 retention 的 personalized 变体 p=0.079，未达传统 0.05 显著性；这是合成数据的特性，不影响整改通过，但后续若需更显著结果可进一步校准。
+- D7 retention 的 personalized 变体在 5,000 用户下 p=0.079，未达传统 0.05 显著性；这是合成数据的特性，不影响整改通过，但后续若需更显著结果可进一步校准。
 - 1,000 用户的 sample 数据由于样本量小，部分指标 p 值不显著；完整 5,000 用户分析更稳定。
 - 尚未开始 Phase 2；后续进入 Phase 2 前必须获得 Codex 明确批准。
+- 依赖安装过程中网络较慢，若在新环境安装失败可多试几次或使用 `uv pip install`。
 
 ## 8. 下一步建议
 
@@ -270,5 +269,5 @@ $env:PYTHONPATH = "src"
 ## 附录：本次会话工作记录摘要
 
 - **会话时间**：2026-06-15
-- **本次任务**：新增无状态会话交接制度；验证真实 Python 环境；创建 `.venv`；用 `.venv` 重新运行 29 项测试；更新 README/HANDOVER/整改报告命令；将源码注释中文化；清理临时资源；提交修改。
-- **详细工作日志**：见 `docs/worklogs/2026-06-15_phase1_environment-and-docs.md`
+- **本次任务**：修复 `.venv` 指向 Windows Store alias 的问题；安装真实 CPython 3.11.15 并重新创建 `.venv`；将源码/脚本/测试注释恢复为专业英文；执行非 ASCII 扫描；用 `.venv` 重新运行 29 项测试、1,000 用户数据生成、`run_analysis.py`、`compute_summary.py`；更新 README/HANDOVER/整改报告；清理临时资源；提交修改。
+- **详细工作日志**：见 `docs/worklogs/2026-06-15_phase1_final-remediation.md`

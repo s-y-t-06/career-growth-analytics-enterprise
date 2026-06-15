@@ -1,1 +1,1 @@
-﻿
+"""Synthetic data generation module."""

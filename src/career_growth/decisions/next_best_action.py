@@ -1,7 +1,8 @@
-"""基于规则的下一个最佳动作（Next Best Action）引擎。
+"""Rule-based Next Best Action engine.
 
-本模块实现了已批准的优先级规则。它不需要流失风险模型分数；
-当提供分数时会使用分数，否则使用简单的活跃度启发式来识别高风险用户。
+This module implements the approved priority rules. It does not require a
+churn risk model score; when a score is provided it is used, otherwise a
+simple activity heuristic is applied for high-risk detection.
 """
 
 from datetime import timedelta
@@ -13,7 +14,7 @@ from career_growth import config
 
 
 def compute_user_state(user_id: str, events: pd.DataFrame, cutoff: pd.Timestamp) -> dict[str, Any]:
-    """计算截至截止时间戳的用户生命周期状态。"""
+    """Compute the lifecycle state for a user up to a cutoff timestamp."""
     user_events = events[
         (events["user_id"] == user_id)
         & (events["event_timestamp"] <= cutoff)
@@ -44,16 +45,16 @@ def recommend_next_action(
     cutoff: pd.Timestamp | None = None,
     churn_risk_score: float | None = None,
 ) -> dict[str, Any]:
-    """返回单个用户的推荐下一个最佳动作。
+    """Return the recommended next best action for a single user.
 
     Args:
-        user: 用户 DataFrame 中的一行。
-        events: 事件 DataFrame。
-        cutoff: 用于计算状态的截止时间戳。默认为注册后 7 天。
-        churn_risk_score: 可选的模型分数；如果为 None，则使用近期不活跃作为判断。
+        user: row from users DataFrame.
+        events: events DataFrame.
+        cutoff: timestamp used to compute state. Defaults to signup + 7 days.
+        churn_risk_score: optional model score; if None, recent inactivity is used.
 
     Returns:
-        包含 action_name、channel 和 reason 的字典。
+        Dictionary with action_name, channel, and reason.
     """
     if cutoff is None:
         cutoff = user["signup_timestamp"] + timedelta(days=config.PREDICTION_CUTOFF_DAY)
@@ -61,9 +62,9 @@ def recommend_next_action(
     state = compute_user_state(user["user_id"], events, cutoff)
     consent = bool(user["marketing_consent"])
 
-    # 规则 1：高流失风险且同意营销 -> 再互动。
-    # 当没有模型分数时，仅标记已完成新手引导但不活跃的用户；
-    # 新用户会被引导至新手引导。
+    # Rule 1: high churn risk and consent -> reengagement.
+    # When no model score is available, we only flag users who completed
+    # onboarding but have become inactive; new users are routed to onboarding.
     high_risk = (
         (churn_risk_score is not None and churn_risk_score >= 0.70)
         or (
@@ -85,7 +86,7 @@ def recommend_next_action(
             "reason": "high churn risk without marketing consent",
         }
 
-    # 规则 2：未完成新手引导。
+    # Rule 2: incomplete onboarding.
     if not state["onboarding_completed"]:
         return {
             "action_name": "complete_onboarding",
@@ -93,7 +94,7 @@ def recommend_next_action(
             "reason": "onboarding not completed",
         }
 
-    # 规则 3：未完善资料。
+    # Rule 3: no profile.
     if not state["profile_completed"]:
         return {
             "action_name": "complete_profile",
@@ -101,7 +102,7 @@ def recommend_next_action(
             "reason": "profile not completed",
         }
 
-    # 规则 4：未上传简历。
+    # Rule 4: no resume.
     if not state["resume_uploaded"]:
         return {
             "action_name": "upload_resume",
@@ -109,7 +110,7 @@ def recommend_next_action(
             "reason": "resume not uploaded",
         }
 
-    # 规则 5：未查看职位推荐。
+    # Rule 5: no job recommendation view.
     if not state["job_recommendation_viewed"]:
         return {
             "action_name": "view_job_recommendations",
@@ -117,7 +118,7 @@ def recommend_next_action(
             "reason": "job recommendations not viewed",
         }
 
-    # 规则 6：已查看但未保存。
+    # Rule 6: viewed but not saved.
     if not state["job_saved"]:
         return {
             "action_name": "save_relevant_job",
@@ -125,7 +126,7 @@ def recommend_next_action(
             "reason": "job viewed but not saved",
         }
 
-    # 规则 7：未完成成长任务。
+    # Rule 7: no growth task.
     if not state["growth_task_completed"]:
         return {
             "action_name": "complete_growth_task",
@@ -133,7 +134,7 @@ def recommend_next_action(
             "reason": "growth task not completed",
         }
 
-    # 规则 8：未生成职业报告。
+    # Rule 8: no career report.
     if not state["career_report_generated"]:
         return {
             "action_name": "generate_career_report",
@@ -141,7 +142,7 @@ def recommend_next_action(
             "reason": "career report not generated",
         }
 
-    # 规则 9：已完成所有核心行为。
+    # Rule 9: all core actions done.
     return {
         "action_name": "continue_weekly_engagement",
         "channel": "email" if consent else "in_app",

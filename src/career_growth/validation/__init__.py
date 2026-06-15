@@ -1,1 +1,1 @@
-﻿
+"""Data validation module."""

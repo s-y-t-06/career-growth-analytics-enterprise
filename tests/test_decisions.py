@@ -1,4 +1,4 @@
-"""下一个最佳动作规则引擎的测试。"""
+"""Tests for the Next Best Action rule engine."""
 
 import pandas as pd
 

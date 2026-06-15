@@ -1,4 +1,4 @@
-"""合成数据生成管道的测试。"""
+"""Tests for the synthetic data generation pipeline."""
 
 import hashlib
 from pathlib import Path
@@ -24,7 +24,7 @@ def _file_hash(path: Path) -> str:
 
 
 def test_generation_reproducibility(tmp_path):
-    """相同的种子必须生成字节完全相同的 CSV 输出。"""
+    """Same seed must produce byte-identical CSV outputs."""
     dir_a = tmp_path / "a"
     dir_b = tmp_path / "b"
     generate_all_data(count=200, seed=123, output_dir=str(dir_a))
@@ -102,7 +102,7 @@ def test_active_events_only_for_label(synthetic_data):
 
 
 def test_intervention_win_back_targets_churned(synthetic_data):
-    """挽回干预必须仅发送给已流失用户。"""
+    """Win-back interventions must only be sent to churned users."""
     interventions = synthetic_data["interventions"]
     labels = synthetic_data["labels"]
 
@@ -123,7 +123,7 @@ def test_intervention_win_back_targets_churned(synthetic_data):
 
 
 def test_intervention_reproducibility(tmp_path):
-    """干预记录在固定种子下必须是确定性的。"""
+    """Intervention records must be deterministic for a fixed seed."""
     dir_a = tmp_path / "a"
     dir_b = tmp_path / "b"
     generate_all_data(count=200, seed=7, output_dir=str(dir_a))

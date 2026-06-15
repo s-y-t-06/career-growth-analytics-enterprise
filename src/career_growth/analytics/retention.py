@@ -1,4 +1,4 @@
-"""留存与同群分析。"""
+"""Retention and cohort analytics."""
 
 import pandas as pd
 
@@ -6,7 +6,7 @@ from career_growth import config
 
 
 def _normalize_date(series: pd.Series) -> pd.Series:
-    """返回去掉时区并按天取整的序列，用于一致的日期比较。"""
+    """Return a tz-naive floor-to-day Series for consistent date comparisons."""
     return series.dt.tz_localize(None).dt.floor("D")
 
 
@@ -16,10 +16,10 @@ def compute_day_retention(
     day: int,
     group_by: str | None = None,
 ) -> pd.DataFrame:
-    """计算注册后第特定天的留存率。
+    """Compute retention for a specific day after signup.
 
-    当用户至少有一个 event_source 为 user_action 的事件，
-    且其日历日期等于 signup_date + N 时，视为第 N 天留存。
+    A user is retained on day N if they have at least one user_action event
+    whose calendar day equals signup_date + N.
     """
     active_events = events[events["event_source"] == "user_action"].copy()
     active_events["event_date"] = _normalize_date(active_events["event_timestamp"])
@@ -28,7 +28,7 @@ def compute_day_retention(
     users_copy["signup_date"] = _normalize_date(users_copy["signup_timestamp"])
     target_date = users_copy["signup_date"] + pd.Timedelta(days=day)
 
-    # 向量化方法：构建 (user_id, event_date) 对的集合。
+    # Vectorized approach: build a set of (user_id, event_date) pairs.
     user_date_pairs = set(zip(active_events["user_id"], active_events["event_date"]))
     users_copy["target_date"] = target_date
     users_copy["retained"] = users_copy.apply(
@@ -51,13 +51,13 @@ def compute_cohort_retention(
     days: list[int] = (1, 7, 14),
     cohort_col: str = "signup_week",
 ) -> pd.DataFrame:
-    """计算同群留存矩阵。
+    """Compute a cohort retention matrix.
 
-    同群由 `cohort_col` 定义。支持的取值：
+    Cohorts are defined by `cohort_col`. Supported values:
     - signup_week
     - acquisition_channel
     - device_type
-    - variant_id（需要先合并实验分配）
+    - variant_id (requires merging experiment assignments)
     """
     active_events = events[events["event_source"] == "user_action"].copy()
     active_events["event_date"] = _normalize_date(active_events["event_timestamp"])
@@ -101,7 +101,7 @@ def compute_rolling_retention(
     events: pd.DataFrame,
     day: int,
 ) -> float:
-    """计算整体滚动留存：第 N 天或之后仍有活动的用户占比。"""
+    """Compute overall rolling retention: share of users active on or after day N."""
     active_events = events[events["event_source"] == "user_action"].copy()
     user_last_event = active_events.groupby("user_id")["event_timestamp"].max()
 
@@ -119,10 +119,10 @@ def compute_retention_by_variant(
     day: int,
     experiment_id: str = config.ONBOARDING_EXPERIMENT_ID,
 ) -> pd.DataFrame:
-    """按实验变体计算第 N 天留存。
+    """Compute day-N retention grouped by experiment variant.
 
-    该函数将实验分配合并到 ``users`` 的副本上，
-    并委托给 ``compute_day_retention`` 进行计算。
+    The function merges experiment assignments onto a copy of ``users`` and
+    delegates to ``compute_day_retention``.
     """
     users_with_variant = users.merge(
         experiment_assignments[

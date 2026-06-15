@@ -1,4 +1,4 @@
-"""特征工程与标签构建的测试。"""
+"""Tests for feature engineering and label construction."""
 
 import pandas as pd
 
