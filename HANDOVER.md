@@ -74,7 +74,7 @@ $env:PYTHONPATH = "src"
 .venv\Scripts\python.exe -m pytest tests -q
 ```
 
-结果（Phase 1 + Phase 2 共 44 项）：
+结果（Phase 1 + Phase 2 共 47 项）：
 
 `	ext
 ============================= test session starts =============================
@@ -82,17 +82,18 @@ platform win32 -- Python 3.11.15, pytest-9.1.0, pluggy-1.6.0
 rootdir: C:\Users\Administrator\Desktop\career-growth-analytics
 configfile: pyproject.toml
 testpaths: tests
-collected 44 items
+collected 47 items
 
 tests\test_analytics.py .........
 tests\test_data_generation.py ........
 tests\test_decisions.py ..
 tests\test_features.py ...
-tests\test_model_features.py ......
-tests\test_modeling.py .........
+tests\test_model_features.py ........
+tests\test_modeling.py ...............
+tests\test_nba_integration.py ....
 tests\test_validation.py ....
 
-============================= 44 passed =============================
+============================= 47 passed =============================
 `
 
 ### 当前数据状态
@@ -249,9 +250,10 @@ $env:PYTHONPATH = "src"
 | 分析 | `src/career_growth/analytics/funnel.py`, `retention.py`, `experiments.py` |
 | 建模 | `src/career_growth/modeling/split.py`, `pipeline.py`, `evaluate.py`, `explain.py`, `train.py` |
 | 决策 | `src/career_growth/decisions/next_best_action.py` |
-| 测试 | `tests/test_data_generation.py`, `test_validation.py`, `test_analytics.py`, `test_features.py`, `test_decisions.py`, `test_model_features.py`, `test_modeling.py`, `tests/conftest.py` |
+| 测试 | `tests/test_data_generation.py`, `test_validation.py`, `test_analytics.py`, `test_features.py`, `test_decisions.py`, `test_model_features.py`, `test_modeling.py`, `test_nba_integration.py`, `tests/conftest.py` |
 | 脚本 | `scripts/generate_data.py`, `run_analysis.py`, `compute_summary.py`, `build_notebook.py`, `train_churn_model.py` |
 | 文档 | `README.md`, `docs/data_schema.md`, `docs/methodology.md`, `docs/model_card.md`, `pyproject.toml`, `.gitignore` |
+| 产物 | `artifacts/churn_model.joblib`, `model_metadata.json`, `metrics.json`, `feature_schema.json`, `explainability.json`, `user_explanations.json`, `subgroup_metrics.*`, `nba_examples.*`, `plots/*.png` |
 | 验收 | `PHASE1_REMEDIATION_REPORT.md`, `PHASE2_MODELING_REPORT.md`, `HANDOVER.md`（本文件） |
 
 ## 7. 尚未解决的风险

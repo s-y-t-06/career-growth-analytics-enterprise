@@ -159,14 +159,31 @@ This script:
 
 - Generates or loads synthetic data.
 - Builds pre-cutoff features and attaches churn labels.
+- Saves the engineered feature matrix to `data/processed/model_features.csv`.
 - Splits users chronologically into train/validation/test sets.
 - Trains a Logistic Regression baseline and a HistGradientBoostingClassifier.
 - Selects the best model by validation PR-AUC.
-- Chooses an operating threshold on the validation set (F1 by default).
-- Evaluates the selected model exactly once on the test set.
-- Saves the model, metadata, metrics, feature schema, explainability artifacts, and plots under `artifacts/`.
+- Chooses an operating threshold on the validation set (F1 by default; Youden index also supported).
+- Evaluates the selected model exactly once on the test set, including Brier score and confusion matrix.
+- Outputs subgroup metrics by `acquisition_channel`, `career_stage`, and `device_type`.
+- Produces global and user-level explanations, plus Next Best Action examples.
+- Saves the model, metadata, metrics, feature schema, explainability artifacts, subgroup metrics, NBA examples, and plots under `artifacts/`.
 
 To use existing data instead of regenerating it, add `--use-existing-data`.
+
+## Model Artifacts
+
+Formal artifacts under `artifacts/` are committed as deliverables. Key files include:
+
+- `artifacts/churn_model.joblib` -- selected, fitted model
+- `artifacts/model_metadata.json` -- model name, version, training timestamp, cutoff/window days, feature columns, threshold, split time ranges, sizes, churn rates, library versions
+- `artifacts/metrics.json` -- candidate validation metrics, selected model, threshold, validation metrics, test metrics, confusion matrix
+- `artifacts/feature_schema.json` -- separated categorical and numeric feature lists
+- `artifacts/explainability.json` -- top coefficients, permutation importance, user explanations
+- `artifacts/user_explanations.json` -- at least 3 user-level explanations
+- `artifacts/subgroup_metrics.csv` / `subgroup_metrics.json` -- subgroup evaluation
+- `artifacts/nba_examples.csv` / `nba_examples.json` -- Next Best Action examples
+- `artifacts/plots/*.png` -- PR, ROC, calibration, confusion matrix, risk distribution, and feature importance plots
 
 ## Run Tests
 

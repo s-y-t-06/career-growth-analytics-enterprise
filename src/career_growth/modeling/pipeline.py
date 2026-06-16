@@ -2,6 +2,7 @@
 
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import HistGradientBoostingClassifier
+from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -14,14 +15,20 @@ def build_logistic_regression_pipeline(random_state: int = config.RANDOM_SEED) -
     """Return a balanced Logistic Regression pipeline with one-hot encoding.
 
     Categorical features are one-hot encoded with infrequent category handling.
-    Numeric features are standardized. The classifier uses balanced class weights.
+    Numeric features are imputed with the median and standardized. The classifier
+    uses balanced class weights.
     """
     categorical_transformer = OneHotEncoder(
         handle_unknown="infrequent_if_exist",
         sparse_output=False,
         min_frequency=0.01,
     )
-    numeric_transformer = StandardScaler()
+    numeric_transformer = Pipeline(
+        steps=[
+            ("imputer", SimpleImputer(strategy="median")),
+            ("scaler", StandardScaler()),
+        ]
+    )
 
     preprocessor = ColumnTransformer(
         transformers=[
@@ -55,17 +62,19 @@ def build_hist_gradient_boosting_pipeline(
 
     HistGradientBoostingClassifier can handle numeric features natively, but the
     categorical features are one-hot encoded for consistency and interpretability.
+    Numeric features are imputed with the median.
     """
     categorical_transformer = OneHotEncoder(
         handle_unknown="infrequent_if_exist",
         sparse_output=False,
         min_frequency=0.01,
     )
+    numeric_transformer = SimpleImputer(strategy="median")
 
     preprocessor = ColumnTransformer(
         transformers=[
             ("cat", categorical_transformer, CATEGORICAL_FEATURES),
-            ("num", "passthrough", NUMERIC_FEATURES),
+            ("num", numeric_transformer, NUMERIC_FEATURES),
         ],
         remainder="drop",
     )

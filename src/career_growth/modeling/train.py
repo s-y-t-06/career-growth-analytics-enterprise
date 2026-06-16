@@ -33,6 +33,7 @@ class TrainingResult:
 
     model: Pipeline
     model_name: str
+    candidate_validation_metrics: dict[str, dict[str, float]]
     val_metrics: dict[str, float]
     test_metrics: dict[str, float]
     threshold: float
@@ -75,6 +76,7 @@ def train_and_select_model(
         "hist_gradient_boosting": build_hist_gradient_boosting_pipeline(random_state),
     }
 
+    candidate_validation_metrics: dict[str, dict[str, float]] = {}
     best_model_name: str | None = None
     best_pr_auc: float = -np.inf
     best_model: Pipeline | None = None
@@ -85,6 +87,7 @@ def train_and_select_model(
         fitted = pipeline.fit(X_train, y_train)
         val_prob = fitted.predict_proba(X_val)[:, 1]
         val_metrics = compute_metrics(y_val, val_prob, threshold=0.5)
+        candidate_validation_metrics[name] = val_metrics
 
         if val_metrics["pr_auc"] > best_pr_auc:
             best_pr_auc = val_metrics["pr_auc"]
@@ -105,6 +108,7 @@ def train_and_select_model(
     return TrainingResult(
         model=best_model,
         model_name=best_model_name,
+        candidate_validation_metrics=candidate_validation_metrics,
         val_metrics=val_metrics,
         test_metrics=test_metrics,
         threshold=best_threshold,

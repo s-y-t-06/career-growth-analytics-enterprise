@@ -50,10 +50,10 @@ Thumbs.db
 
 # Data artifacts
 # Small sample CSVs under data/sample are kept for demonstration.
+# Formal model artifacts under artifacts/ are committed as deliverables.
 data_tmp_grid/
 data_test_*/
 *.log
-artifacts/
 
 # Local secrets
 .env

@@ -15,6 +15,7 @@ def compute_metrics(
         "pr_auc": float(metrics.average_precision_score(y_true, y_prob)),
         "roc_auc": float(metrics.roc_auc_score(y_true, y_prob)),
         "log_loss": float(metrics.log_loss(y_true, y_prob)),
+        "brier_score": float(metrics.brier_score_loss(y_true, y_prob)),
         "threshold": float(threshold),
         "precision": float(metrics.precision_score(y_true, y_pred, zero_division=0)),
         "recall": float(metrics.recall_score(y_true, y_pred, zero_division=0)),
@@ -43,6 +44,12 @@ def select_threshold(
     -------
     The threshold that maximizes the chosen criterion.
     """
+    if criterion == "youden":
+        fpr, tpr, roc_thresholds = metrics.roc_curve(y_true, y_prob)
+        youden_index = tpr - fpr
+        best_idx = int(np.argmax(youden_index))
+        return float(roc_thresholds[best_idx])
+
     thresholds = np.linspace(0.0, 1.0, n_thresholds)
     best_threshold = 0.5
     best_score = -np.inf
@@ -57,9 +64,6 @@ def select_threshold(
             score = metrics.recall_score(y_true, y_pred, zero_division=0)
         elif criterion == "f2":
             score = metrics.fbeta_score(y_true, y_pred, beta=2, zero_division=0)
-        elif criterion == "youden":
-            fpr, tpr, _ = metrics.roc_curve(y_true, y_prob)
-            score = max(tpr - fpr)
         else:
             raise ValueError(f"Unsupported threshold criterion: {criterion}")
 
@@ -68,6 +72,20 @@ def select_threshold(
             best_threshold = threshold
 
     return float(best_threshold)
+
+
+def compute_confusion_matrix(
+    y_true: np.ndarray, y_prob: np.ndarray, threshold: float
+) -> dict[str, int]:
+    """Return confusion matrix counts for a fixed threshold."""
+    y_pred = (y_prob >= threshold).astype(int)
+    tn, fp, fn, tp = metrics.confusion_matrix(y_true, y_pred).ravel()
+    return {
+        "true_negative": int(tn),
+        "false_positive": int(fp),
+        "false_negative": int(fn),
+        "true_positive": int(tp),
+    }
 
 
 def compute_calibration_data(

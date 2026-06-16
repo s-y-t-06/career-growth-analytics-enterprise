@@ -1,5 +1,6 @@
 """Tests for churn model feature engineering."""
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -43,7 +44,7 @@ def test_build_model_features_columns(sample_data):
 
 
 def test_build_model_features_no_null_categoricals(sample_data):
-    """Categorical features must be populated; numeric columns must be finite."""
+    """Categorical features must be populated."""
     features = build_model_features(
         sample_data["users"],
         sample_data["events"],
@@ -53,36 +54,76 @@ def test_build_model_features_no_null_categoricals(sample_data):
     for col in CATEGORICAL_FEATURES:
         assert features[col].notna().all(), f"Null values found in {col}"
 
+
+def test_time_features_use_missing_for_inactive_users(sample_data):
+    """Time-based features for users with no pre-cutoff actions must be NaN."""
+    users = sample_data["users"].head(10).copy()
+    # Remove all events for the first user so it has no pre-cutoff behavior.
+    events = sample_data["events"][
+        sample_data["events"]["user_id"] != users.iloc[0]["user_id"]
+    ].copy()
+
+    features = build_model_features(
+        users,
+        events,
+        sample_data["experiment_assignments"],
+    )
+
+    row = features[features["user_id"] == users.iloc[0]["user_id"]].iloc[0]
+    for col in ["hours_to_first_action", "hours_since_last_action_at_cutoff"]:
+        assert pd.isna(row[col]), f"Expected NaN in {col} for inactive user"
+
+
+def test_numeric_features_are_numeric(sample_data):
+    """Numeric columns must have a numeric dtype."""
+    features = build_model_features(
+        sample_data["users"],
+        sample_data["events"],
+        sample_data["experiment_assignments"],
+    )
+
     for col in NUMERIC_FEATURES:
-        assert features[col].notna().all(), f"Null values found in {col}"
         assert pd.api.types.is_numeric_dtype(features[col]), f"{col} is not numeric"
 
 
-def test_build_model_features_uses_pre_cutoff_events_only(sample_data):
-    """Features must ignore events at or after the prediction cutoff."""
-    users = sample_data["users"].head(10).copy()
+def test_build_model_features_ignores_post_cutoff_events(sample_data):
+    """Adding post-cutoff events must not change any model feature values."""
+    users = sample_data["users"].head(20).copy()
     events = sample_data["events"].copy()
 
-    features = build_model_features(users, events)
+    features_before = build_model_features(users, events)
 
+    # Inject synthetic post-cutoff events for every user.
+    post_cutoff_events = []
     for _, user in users.iterrows():
-        cutoff = user["signup_timestamp"] + pd.Timedelta(days=7)
-        user_events = events[
-            (events["user_id"] == user["user_id"])
-            & (events["event_timestamp"] >= cutoff)
-        ]
-        # No post-cutoff events should influence the feature values.
-        row = features[features["user_id"] == user["user_id"]].iloc[0]
-        assert row["num_user_actions"] == int(
-            len(
-                events[
-                    (events["user_id"] == user["user_id"])
-                    & (events["event_timestamp"] < cutoff)
-                    & (events["event_source"] == "user_action")
-                ]
+        cutoff = pd.to_datetime(user["signup_timestamp"]) + pd.Timedelta(days=7)
+        for i in range(5):
+            post_cutoff_events.append(
+                {
+                    "event_id": f"post-{user['user_id']}-{i}",
+                    "user_id": user["user_id"],
+                    "session_id": f"post-session-{user['user_id']}-{i}",
+                    "event_name": "job_detail_view",
+                    "event_timestamp": cutoff + pd.Timedelta(hours=i + 1),
+                    "event_properties": "{}",
+                    "page_name": "post_page",
+                    "platform": "web",
+                    "event_source": "user_action",
+                    "experiment_id": None,
+                    "variant_id": None,
+                }
             )
-        )
-        assert user_events.empty or row["num_user_actions"] >= 0
+    events_with_post = pd.concat(
+        [events, pd.DataFrame(post_cutoff_events)], ignore_index=True
+    )
+    features_after = build_model_features(users, events_with_post)
+
+    feature_cols = [c for c in features_before.columns if c != "signup_timestamp"]
+    pd.testing.assert_frame_equal(
+        features_before[feature_cols].sort_values("user_id").reset_index(drop=True),
+        features_after[feature_cols].sort_values("user_id").reset_index(drop=True),
+        check_dtype=False,
+    )
 
 
 def test_variant_feature_joined(sample_data):

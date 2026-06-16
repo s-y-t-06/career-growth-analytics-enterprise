@@ -16,6 +16,8 @@ CATEGORICAL_FEATURES: list[str] = [
     "user_intent_level",
     "career_stage",
     "onboarding_variant",
+    "language",
+    "timezone",
 ]
 
 NUMERIC_FEATURES: list[str] = [
@@ -40,6 +42,14 @@ NUMERIC_FEATURES: list[str] = [
     "avg_events_per_session",
     "max_events_in_session",
     "total_user_actions_in_sessions",
+    "unique_event_type_count",
+    "first_day_event_count",
+    "last_2_days_event_count",
+    "hours_to_first_action",
+    "hours_since_last_action_at_cutoff",
+    "ai_assistant_interaction_count",
+    "job_detail_view_count",
+    "return_visit_count",
 ]
 
 ALL_FEATURE_COLUMNS: list[str] = CATEGORICAL_FEATURES + NUMERIC_FEATURES
@@ -64,6 +74,8 @@ def _build_static_features(users: pd.DataFrame) -> pd.DataFrame:
                 "device_type": user["device_type"],
                 "user_intent_level": user["user_intent_level"],
                 "career_stage": user["career_stage"],
+                "language": user.get("language", "unknown"),
+                "timezone": user.get("timezone", "unknown"),
                 "signup_hour": signup.hour,
                 "signup_day_of_week": signup.dayofweek,
                 "marketing_consent": int(bool(user["marketing_consent"])),
@@ -103,6 +115,11 @@ def _build_variant_features(
     return variants
 
 
+def _hours_between(start: pd.Timestamp, end: pd.Timestamp) -> float:
+    """Return the number of hours between two timestamps."""
+    return (end - start).total_seconds() / 3600.0
+
+
 def _build_behavior_features(
     users: pd.DataFrame, events: pd.DataFrame
 ) -> pd.DataFrame:
@@ -111,6 +128,7 @@ def _build_behavior_features(
     for _, user in users.iterrows():
         user_id = user["user_id"]
         cutoff = _user_cutoff(user)
+        signup = pd.to_datetime(user["signup_timestamp"])
 
         user_events = events[events["user_id"] == user_id].copy()
         pre_cutoff = user_events[user_events["event_timestamp"] < cutoff]
@@ -148,6 +166,37 @@ def _build_behavior_features(
             ).size().sum()
         )
 
+        unique_event_type_count = int(pre_cutoff["event_name"].nunique())
+
+        first_day_end = signup + timedelta(days=1)
+        first_day_event_count = int(
+            len(pre_cutoff[pre_cutoff["event_timestamp"] < first_day_end])
+        )
+
+        last_2_days_start = cutoff - timedelta(days=2)
+        last_2_days_event_count = int(
+            len(pre_cutoff[pre_cutoff["event_timestamp"] >= last_2_days_start])
+        )
+
+        if user_actions.empty:
+            hours_to_first_action = np.nan
+            hours_since_last_action_at_cutoff = np.nan
+        else:
+            first_action = user_actions["event_timestamp"].min()
+            last_action = user_actions["event_timestamp"].max()
+            hours_to_first_action = _hours_between(signup, first_action)
+            hours_since_last_action_at_cutoff = _hours_between(last_action, cutoff)
+
+        ai_assistant_interaction_count = int(
+            (pre_cutoff["event_name"] == "ai_assistant_interaction").sum()
+        )
+        job_detail_view_count = int(
+            (pre_cutoff["event_name"] == "job_detail_view").sum()
+        )
+        return_visit_count = int(
+            (pre_cutoff["event_name"] == "return_visit").sum()
+        )
+
         records.append(
             {
                 "user_id": user_id,
@@ -164,6 +213,14 @@ def _build_behavior_features(
                 "avg_events_per_session": avg_events_per_session,
                 "max_events_in_session": max_events_in_session,
                 "total_user_actions_in_sessions": total_user_actions_in_sessions,
+                "unique_event_type_count": unique_event_type_count,
+                "first_day_event_count": first_day_event_count,
+                "last_2_days_event_count": last_2_days_event_count,
+                "hours_to_first_action": hours_to_first_action,
+                "hours_since_last_action_at_cutoff": hours_since_last_action_at_cutoff,
+                "ai_assistant_interaction_count": ai_assistant_interaction_count,
+                "job_detail_view_count": job_detail_view_count,
+                "return_visit_count": return_visit_count,
                 **core_action_counts,
             }
         )
@@ -213,7 +270,12 @@ def build_model_features(
     features["signup_timestamp"] = pd.to_datetime(features["signup_timestamp"])
 
     numeric_cols = [c for c in NUMERIC_FEATURES if c in features.columns]
-    features[numeric_cols] = features[numeric_cols].fillna(0).astype(float)
+    # Preserve NaN for time-based features; imputation happens in the pipeline.
+    for col in numeric_cols:
+        if col not in {"hours_to_first_action", "hours_since_last_action_at_cutoff"}:
+            features[col] = features[col].fillna(0).astype(float)
+        else:
+            features[col] = features[col].astype(float)
 
     return features
 
@@ -239,3 +301,10 @@ def prepare_model_matrix(
     """Build features, attach labels, and return the complete modeling matrix."""
     features = build_model_features(users, events, experiment_assignments)
     return attach_labels(features, labels)
+
+
+def save_model_features(
+    features: pd.DataFrame, output_path: str = "data/processed/model_features.csv"
+) -> None:
+    """Save the engineered feature matrix to disk."""
+    features.to_csv(output_path, index=False)
