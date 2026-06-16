@@ -214,7 +214,7 @@ Result: build succeeded, output in `frontend/dist/`.
 
 ## 12. Git Commit Hash
 
-To be updated after final commit.
+`42dd34f feat: Phase 3 Enterprise-level local full-stack system`
 
 ## 13. Temporary Resources Released
 
