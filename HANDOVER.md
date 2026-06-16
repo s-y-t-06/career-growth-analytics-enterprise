@@ -15,7 +15,7 @@
 ## 2. 当前 git 状态
 
 `	ext
-b32666a feat: Phase 2 churn prediction with LR baseline and HistGradientBoosting
+9d76f63 feat: complete Phase 2 churn modeling scope
 `
 
 工作目录干净，无未提交修改。
