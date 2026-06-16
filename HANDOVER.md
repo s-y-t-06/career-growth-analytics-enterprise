@@ -1,4 +1,4 @@
-# 交接报告：Career Growth Analytics Phase 1 整改
+# 交接报告：Career Growth Analytics Phase 2 完成
 
 > 本报告用于会话重启后下一任 AI 快速接手。请优先阅读本文件，再阅读 `PHASE1_REMEDIATION_REPORT.md`。
 > 新增永久协作约束：每次新会话必须独立阅读 HANDOVER.md、任务书/验收要求、最近阶段报告、README.md、git status 和最近 5 条 commit；工作结束前必须更新 HANDOVER.md 并写入 `docs/worklogs/`。
@@ -18,7 +18,25 @@
 9d76f63 feat: complete Phase 2 churn modeling scope
 `
 
-工作目录干净，无未提交修改。
+工作目录存在本次修复的未提交修改，将在工作记录写入后统一提交。
+
+当前最新 commit：
+
+`\text
+3083933 docs: update HANDOVER.md with final Phase 2 commit hash
+`
+
+本次修改文件：
+
+- `.gitignore`：新增 `data/training/` 忽略规则
+- `HANDOVER.md`：更新阶段、测试与数据状态
+- `PHASE2_MODELING_REPORT.md`：更新 artifacts 路径说明
+- `README.md`：更新训练命令说明
+- `scripts/train_churn_model.py`：`--data-dir` 默认改为 `data/training`
+- `src/career_growth/features/model_features.py`：默认输出路径改为 `data/training/processed/model_features.csv`
+- `tests/test_train_script.py`：新增训练数据目录隔离测试
+- `artifacts/churn_model.joblib`、`artifacts/model_metadata.json`：重新训练后时间戳更新
+- `data/processed/model_features.csv`：删除（该文件为训练输出，现移至 `data/training/processed/`）
 
 ## 3. 已完成的整改内容（Phase 1 Remediation）
 
@@ -74,35 +92,37 @@ $env:PYTHONPATH = "src"
 .venv\Scripts\python.exe -m pytest tests -q
 ```
 
-结果（Phase 1 + Phase 2 共 47 项）：
+结果（Phase 1 + Phase 2 共 58 项）：
 
 `	ext
 ============================= test session starts =============================
 platform win32 -- Python 3.11.15, pytest-9.1.0, pluggy-1.6.0
 rootdir: C:\Users\Administrator\Desktop\career-growth-analytics
 configfile: pyproject.toml
-testpaths: tests
-collected 47 items
+collected 58 items
 
-tests\test_analytics.py .........
-tests\test_data_generation.py ........
+tests\test_analytics.py ...........
+tests\test_data_generation.py .........
 tests\test_decisions.py ..
 tests\test_features.py ...
 tests\test_model_features.py ........
 tests\test_modeling.py ...............
 tests\test_nba_integration.py ....
+tests\test_train_script.py ..
 tests\test_validation.py ....
 
-============================= 47 passed =============================
+======================= 58 passed in 351.85s (0:05:51) ========================
 `
 
 ### 当前数据状态
 
-- 仓库提交的 sample 数据为 **1,000 用户**，位于 `data/sample/` 和 `data/processed/`
-- 完整 **5,000 用户** 数据需本地重新生成：
+- 仓库提交的 sample 数据为 **1,000 用户**，位于 `data/sample/` 和 `data/processed/labels.csv`；运行训练脚本后经验证未被覆盖
+- 完整 **5,000 用户** 训练数据默认写入独立的 `data/training/` 目录（已加入 `.gitignore`），不会被提交，也不会覆盖 `data/sample/`
+- `model_features.csv` 现作为训练输出写入 `data/training/processed/model_features.csv`
+- 运行训练脚本即可在本地生成 5,000 用户训练数据：
   ```powershell
   $env:PYTHONPATH = "src"
-  .venv\Scripts\python.exe scripts/generate_data.py --count 5000 --seed 42
+  .venv\Scripts\python.exe scripts/train_churn_model.py --count 5000 --seed 42
   ```
 
 ### 最新全量 5,000 用户指标（供参考）
@@ -250,29 +270,36 @@ $env:PYTHONPATH = "src"
 | 分析 | `src/career_growth/analytics/funnel.py`, `retention.py`, `experiments.py` |
 | 建模 | `src/career_growth/modeling/split.py`, `pipeline.py`, `evaluate.py`, `explain.py`, `train.py` |
 | 决策 | `src/career_growth/decisions/next_best_action.py` |
-| 测试 | `tests/test_data_generation.py`, `test_validation.py`, `test_analytics.py`, `test_features.py`, `test_decisions.py`, `test_model_features.py`, `test_modeling.py`, `test_nba_integration.py`, `tests/conftest.py` |
+| 测试 | `tests/test_data_generation.py`, `test_validation.py`, `test_analytics.py`, `test_features.py`, `test_decisions.py`, `test_model_features.py`, `test_modeling.py`, `test_nba_integration.py`, `test_train_script.py`, `tests/conftest.py` |
 | 脚本 | `scripts/generate_data.py`, `run_analysis.py`, `compute_summary.py`, `build_notebook.py`, `train_churn_model.py` |
 | 文档 | `README.md`, `docs/data_schema.md`, `docs/methodology.md`, `docs/model_card.md`, `pyproject.toml`, `.gitignore` |
 | 产物 | `artifacts/churn_model.joblib`, `model_metadata.json`, `metrics.json`, `feature_schema.json`, `explainability.json`, `user_explanations.json`, `subgroup_metrics.*`, `nba_examples.*`, `plots/*.png` |
+| 训练数据（本地生成，不提交） | `data/training/sample/*`, `data/training/processed/*` |
 | 验收 | `PHASE1_REMEDIATION_REPORT.md`, `PHASE2_MODELING_REPORT.md`, `HANDOVER.md`（本文件） |
 
 ## 7. 尚未解决的风险
 
 - D7 retention 的 personalized 变体在 5,000 用户下 p=0.079，未达传统 0.05 显著性；这是合成数据的特性，不影响整改通过，但后续若需更显著结果可进一步校准。
 - 1,000 用户的 sample 数据由于样本量小，部分指标 p 值不显著；完整 5,000 用户分析更稳定。
-- 尚未开始 Phase 2；后续进入 Phase 2 前必须获得 Codex 明确批准。
+- Phase 2 已完成，训练数据目录隔离阻塞问题已修复。
 - 依赖安装过程中网络较慢，若在新环境安装失败可多试几次或使用 `uv pip install`。
 
 ## 8. 下一步建议
 
-1. 等待 Codex 对 Phase 2 进行最终验收。
+1. 等待 Codex 对本次修复进行最终确认。
 2. 若 Codex 批准，则开始 Phase 3：Enterprise API 设计与实现、数据库存储、前端展示或生产部署准备。
 3. 若 Codex 提出新整改要求，继续按上述约束执行。
 
 ---
 
-## 附录：本次会话工作记录摘要
+## 附录 A：历史会话工作记录摘要
 
 - **会话时间**：2026-06-15
 - **本次任务**：修复 `.venv` 指向 Windows Store alias 的问题；安装真实 CPython 3.11.15 并重新创建 `.venv`；将源码/脚本/测试注释恢复为专业英文；执行非 ASCII 扫描；用 `.venv` 重新运行 29 项测试、1,000 用户数据生成、`run_analysis.py`、`compute_summary.py`；更新 README/HANDOVER/整改报告；清理临时资源；提交修改。
 - **详细工作日志**：见 `docs/worklogs/2026-06-15_phase1_final-remediation.md`
+
+## 附录 B：本次会话工作记录摘要
+
+- **会话时间**：2026-06-16
+- **本次任务**：修复 Phase 2 最后一个阻塞问题——训练脚本默认会覆盖正式 1,000 用户 sample 数据。将 `scripts/train_churn_model.py` 的 `--data-dir` 默认值改为 `data/training`；更新 `.gitignore` 忽略训练目录；删除误提交的 `data/processed/model_features.csv`；新增 `tests/test_train_script.py` 验证训练数据与 sample 数据隔离；更新 README、PHASE2_MODELING_REPORT.md、HANDOVER.md；重新运行 58 项测试、5,000 用户训练、验证 sample 未被覆盖、git status 干净（除预期变更）；清理临时资源；写入工作日志并提交修改。
+- **详细工作日志**：见 `docs/worklogs/2026-06-16_phase2_training-data-isolation.md`

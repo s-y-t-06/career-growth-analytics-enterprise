@@ -51,6 +51,8 @@ Thumbs.db
 # Data artifacts
 # Small sample CSVs under data/sample are kept for demonstration.
 # Formal model artifacts under artifacts/ are committed as deliverables.
+# Large training datasets are regenerated locally and ignored.
+data/training/
 data_tmp_grid/
 data_test_*/
 *.log

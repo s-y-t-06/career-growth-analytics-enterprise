@@ -46,7 +46,7 @@ DEFAULT_OUTPUT_DIR: str = "artifacts"
 PLOT_DIR: str = "plots"
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
         description="Train churn prediction models and save evaluation artifacts."
@@ -66,8 +66,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--data-dir",
         type=str,
-        default="data",
-        help="Directory containing generated data or used for output.",
+        default="data/training",
+        help="Directory containing generated data or used for output. Defaults to 'data/training' so that the formal sample data under 'data/sample' is never overwritten.",
     )
     parser.add_argument(
         "--output-dir",
@@ -87,7 +87,7 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Load existing CSV files from data-dir instead of regenerating them.",
     )
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def ensure_data(args: argparse.Namespace) -> dict[str, pd.DataFrame]:
@@ -281,7 +281,10 @@ def main() -> int:
     print(f"Model matrix shape: {model_matrix.shape}")
     print(f"Churn rate: {model_matrix['is_churned'].mean():.2%}")
 
-    save_model_features(model_matrix, str(Path(args.data_dir) / "processed" / "model_features.csv"))
+    save_model_features(
+        model_matrix,
+        str(Path(args.data_dir) / "processed" / "model_features.csv"),
+    )
 
     train_users, val_users, test_users, train_labels, val_labels, test_labels = (
         split_users_and_labels(users, labels)

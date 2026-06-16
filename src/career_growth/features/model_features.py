@@ -304,7 +304,7 @@ def prepare_model_matrix(
 
 
 def save_model_features(
-    features: pd.DataFrame, output_path: str = "data/processed/model_features.csv"
+    features: pd.DataFrame, output_path: str = "data/training/processed/model_features.csv"
 ) -> None:
     """Save the engineered feature matrix to disk."""
     features.to_csv(output_path, index=False)

@@ -157,9 +157,9 @@ $env:PYTHONPATH = "src"
 
 This script:
 
-- Generates or loads synthetic data.
+- Generates synthetic data into a dedicated training directory (`data/training/` by default) so that the committed 1,000-user sample data under `data/sample/` is never overwritten.
 - Builds pre-cutoff features and attaches churn labels.
-- Saves the engineered feature matrix to `data/processed/model_features.csv`.
+- Saves the engineered feature matrix to `data/training/processed/model_features.csv`.
 - Splits users chronologically into train/validation/test sets.
 - Trains a Logistic Regression baseline and a HistGradientBoostingClassifier.
 - Selects the best model by validation PR-AUC.

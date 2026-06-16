@@ -109,7 +109,7 @@ The training script `scripts/train_churn_model.py` produces:
 - `artifacts/plots/risk_distribution.png`
 - `artifacts/plots/feature_importance.png`
 
-It also writes `data/processed/model_features.csv`.
+Training data is written to a dedicated directory (default `data/training/`) so that the committed 1,000-user sample data under `data/sample/` is not overwritten. The engineered feature matrix is saved to `data/training/processed/model_features.csv`.
 
 ## 8. Explainability
 

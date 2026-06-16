@@ -1,7 +1,7 @@
 {
   "model_name": "logistic_regression",
   "model_version": "0.2.0",
-  "training_timestamp": "2026-06-16T05:17:21.676316+00:00",
+  "training_timestamp": "2026-06-16T06:25:59.021320+00:00",
   "prediction_cutoff_day": 7,
   "label_window_start_day": 8,
   "label_window_end_day": 21,
