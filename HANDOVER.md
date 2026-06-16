@@ -1,4 +1,4 @@
-# 交接报告：Career Growth Analytics Phase 2 完成
+# 交接报告：Career Growth Analytics Phase 3 完成
 
 > 本报告用于会话重启后下一任 AI 快速接手。请优先阅读本文件，再阅读 `PHASE1_REMEDIATION_REPORT.md`。
 > 新增永久协作约束：每次新会话必须独立阅读 HANDOVER.md、任务书/验收要求、最近阶段报告、README.md、git status 和最近 5 条 commit；工作结束前必须更新 HANDOVER.md 并写入 `docs/worklogs/`。
@@ -8,8 +8,8 @@
 - **MVP 仓库**：`C:\Users\Administrator\Desktop\career-growth-analytics`
 - **项目名**：Career Growth Analytics
 - **业务场景**：AI Career Platform 用户生命周期增长与实验优化系统
-- **当前阶段**：Phase 2 流失预测与模型评估已完成
-- **严格约束**：**不得开始 API、数据库、前端开发或 Enterprise 系统**，必须等 Codex 审批
+- **当前阶段**：Phase 3 Enterprise-level 本地全栈系统已完成
+- **严格约束**：本阶段目标是把现有 MVP 能力产品化、API 化、前端可视化；不得引入 Kafka、Redis、Postgres、Flink 等大型基础设施
 - **合规要求**：不得使用任何 lychas 相关代码、数据或命名
 
 ## 2. 当前 git 状态
@@ -23,20 +23,20 @@
 当前最新 commit：
 
 `\text
-bf08265 fix: isolate 5,000-user training data from committed sample data
+待本次 Phase 3 提交后更新
 `
 
-本次修改文件：
+本次新增/修改文件：
 
-- `.gitignore`：新增 `data/training/` 忽略规则
-- `HANDOVER.md`：更新阶段、测试与数据状态
-- `PHASE2_MODELING_REPORT.md`：更新 artifacts 路径说明
-- `README.md`：更新训练命令说明
-- `scripts/train_churn_model.py`：`--data-dir` 默认改为 `data/training`
-- `src/career_growth/features/model_features.py`：默认输出路径改为 `data/training/processed/model_features.csv`
-- `tests/test_train_script.py`：新增训练数据目录隔离测试
-- `artifacts/churn_model.joblib`、`artifacts/model_metadata.json`：重新训练后时间戳更新
-- `data/processed/model_features.csv`：删除（该文件为训练输出，现移至 `data/training/processed/`）
+- `backend/`：FastAPI 后端（routers、services、database、schemas、main、init_db、tests）
+- `frontend/`：React + Vite + TypeScript 前端
+- `data/app/career_growth.db`：本地 SQLite 数据库（由 init_db.py 生成）
+- `docs/enterprise_architecture.md`、`docs/api_reference.md`：Enterprise 架构与 API 文档
+- `pyproject.toml`：新增 fastapi、uvicorn、httpx、pytest-asyncio、joblib 依赖
+- `.gitignore`：新增 `frontend/node_modules/`、`frontend/dist/` 等忽略规则
+- `README.md`、`HANDOVER.md`：更新启动说明与阶段状态
+- `PHASE3_ENTERPRISE_REPORT.md`：Phase 3 验收报告
+- `docs/worklogs/2026-06-16_phase3_enterprise_system.md`：本次工作记录
 
 ## 3. 已完成的整改内容（Phase 1 Remediation）
 
@@ -89,17 +89,19 @@ ONBOARDING_VARIANTS = [
 ```powershell
 cd C:\Users\Administrator\Desktop\career-growth-analytics
 $env:PYTHONPATH = "src"
-.venv\Scripts\python.exe -m pytest tests -q
+.venv\Scripts\python.exe -m pytest tests backend/tests -q
 ```
 
-结果（Phase 1 + Phase 2 共 58 项）：
+结果（Phase 1 + Phase 2 + Phase 3 后端共 73 项）：
 
 `	ext
 ============================= test session starts =============================
 platform win32 -- Python 3.11.15, pytest-9.1.0, pluggy-1.6.0
 rootdir: C:\Users\Administrator\Desktop\career-growth-analytics
 configfile: pyproject.toml
-collected 58 items
+plugins: anyio-4.13.0, asyncio-1.4.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 73 items
 
 tests\test_analytics.py ...........
 tests\test_data_generation.py .........
@@ -110,8 +112,17 @@ tests\test_modeling.py ...............
 tests\test_nba_integration.py ....
 tests\test_train_script.py ..
 tests\test_validation.py ....
+backend\tests\test_experiment.py .
+backend\tests\test_funnel.py .
+backend\tests\test_health.py .
+backend\tests\test_init_db.py .
+backend\tests\test_model.py ..
+backend\tests\test_nba.py ..
+backend\tests\test_overview.py .
+backend\tests\test_retention.py .
+backend\tests\test_users.py .....
 
-======================= 58 passed in 351.85s (0:05:51) ========================
+================== 73 passed, 1 warning in 537.57s (0:08:57) ==================
 `
 
 ### 当前数据状态
@@ -119,6 +130,7 @@ tests\test_validation.py ....
 - 仓库提交的 sample 数据为 **1,000 用户**，位于 `data/sample/` 和 `data/processed/labels.csv`；运行训练脚本后经验证未被覆盖
 - 完整 **5,000 用户** 训练数据默认写入独立的 `data/training/` 目录（已加入 `.gitignore`），不会被提交，也不会覆盖 `data/sample/`
 - `model_features.csv` 现作为训练输出写入 `data/training/processed/model_features.csv`
+- Enterprise 后端数据库位于 `data/app/career_growth.db`，由 `backend/scripts/init_db.py` 生成
 - 运行训练脚本即可在本地生成 5,000 用户训练数据：
   ```powershell
   $env:PYTHONPATH = "src"
@@ -275,6 +287,9 @@ $env:PYTHONPATH = "src"
 | 文档 | `README.md`, `docs/data_schema.md`, `docs/methodology.md`, `docs/model_card.md`, `pyproject.toml`, `.gitignore` |
 | 产物 | `artifacts/churn_model.joblib`, `model_metadata.json`, `metrics.json`, `feature_schema.json`, `explainability.json`, `user_explanations.json`, `subgroup_metrics.*`, `nba_examples.*`, `plots/*.png` |
 | 训练数据（本地生成，不提交） | `data/training/sample/*`, `data/training/processed/*` |
+| Enterprise 后端 | `backend/app/*`, `backend/scripts/*`, `backend/tests/*` |
+| Enterprise 前端 | `frontend/src/*`, `frontend/package.json`, `frontend/vite.config.ts` |
+| Enterprise 数据库 | `data/app/career_growth.db` |
 | 验收 | `PHASE1_REMEDIATION_REPORT.md`, `PHASE2_MODELING_REPORT.md`, `HANDOVER.md`（本文件） |
 
 ## 7. 尚未解决的风险
@@ -282,13 +297,14 @@ $env:PYTHONPATH = "src"
 - D7 retention 的 personalized 变体在 5,000 用户下 p=0.079，未达传统 0.05 显著性；这是合成数据的特性，不影响整改通过，但后续若需更显著结果可进一步校准。
 - 1,000 用户的 sample 数据由于样本量小，部分指标 p 值不显著；完整 5,000 用户分析更稳定。
 - Phase 2 已完成，训练数据目录隔离阻塞问题已修复。
+- Phase 3 Enterprise-level 本地全栈系统已完成。
 - 依赖安装过程中网络较慢，若在新环境安装失败可多试几次或使用 `uv pip install`。
 
 ## 8. 下一步建议
 
-1. 等待 Codex 对本次修复进行最终确认。
-2. 若 Codex 批准，则开始 Phase 3：Enterprise API 设计与实现、数据库存储、前端展示或生产部署准备。
-3. 若 Codex 提出新整改要求，继续按上述约束执行。
+1. 等待 Codex 对 Phase 3 进行最终验收。
+2. 若 Codex 提出新整改要求，继续按上述约束执行。
+3. 本阶段为本地 Enterprise 系统，尚未包含云端部署、认证授权、实时流处理等高级能力。
 
 ---
 

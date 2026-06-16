@@ -21,6 +21,8 @@ The MVP focuses on the core data and analytics pipeline:
 
 Model training is now included as Phase 2: a reproducible churn prediction pipeline with feature engineering, chronological train/validation/test splits, model selection, and evaluation.
 
+Phase 3 adds an Enterprise-level local full-stack system: a FastAPI backend, SQLite data layer, and React + Vite + TypeScript frontend for interactive product analytics.
+
 ## Business Context
 
 The simulated product helps university students and early-career professionals explore career paths, upload resumes, receive job recommendations, complete growth tasks, and generate career reports. The growth platform measures and optimizes the user journey from signup through activation and retention.
@@ -43,12 +45,35 @@ signup
 
 ```
 career-growth-analytics/
+├── backend/                   # FastAPI enterprise backend
+│   ├── app/                   # Application code
+│   │   ├── main.py            # FastAPI entry point
+│   │   ├── routers/           # API endpoints
+│   │   ├── services/          # Business logic
+│   │   ├── database.py        # SQLite utilities
+│   │   └── schemas.py         # Pydantic models
+│   ├── scripts/               # Backend CLI scripts
+│   │   └── init_db.py         # Initialize SQLite database
+│   └── tests/                 # Backend pytest suite
 ├── data/
 │   ├── sample/                # Generated CSV files (users, events, experiments, interventions)
-│   └── processed/             # Derived outputs such as labels
+│   ├── processed/             # Derived outputs such as labels
+│   ├── app/                   # Local SQLite database
+│   └── training/              # Local 5,000-user training data (ignored by git)
 ├── docs/
 │   ├── data_schema.md         # Full data schema
-│   └── methodology.md         # Generation and label methodology
+│   ├── methodology.md         # Generation and label methodology
+│   ├── model_card.md          # Model card
+│   ├── enterprise_architecture.md  # Enterprise system architecture
+│   └── api_reference.md       # API reference
+├── frontend/                  # React + Vite + TypeScript frontend
+│   ├── src/
+│   │   ├── api/               # API client and types
+│   │   ├── components/        # Shared UI components
+│   │   ├── pages/             # Dashboard pages
+│   │   ├── App.tsx
+│   │   └── main.tsx
+│   └── package.json
 ├── notebooks/
 │   ├── lifecycle_analysis.ipynb   # End-to-end exploratory analysis
 │   └── churn_modeling.ipynb       # Churn prediction modeling
@@ -56,17 +81,10 @@ career-growth-analytics/
 │   ├── generate_data.py       # CLI to regenerate synthetic data
 │   ├── run_analysis.py        # CLI to run validation and analytics
 │   ├── compute_summary.py     # CLI to print a concise summary
-│   └── build_notebook.py      # CLI to execute the notebook from the command line
-├── src/career_growth/
-│   ├── config.py              # Project constants and experiment definitions
-│   ├── schemas.py             # Pydantic row-level schemas
-│   ├── data_generation/       # Synthetic data generators
-│   ├── validation/            # Data quality validator
-│   ├── analytics/             # Funnel, retention, and experiment analysis
-│   ├── features/              # Label construction and model feature engineering
-│   ├── modeling/              # Churn model training, evaluation, explainability
-│   └── decisions/             # Next Best Action rules
-├── tests/                     # pytest suite
+│   ├── build_notebook.py      # CLI to execute the notebook from the command line
+│   └── train_churn_model.py   # CLI to train churn models
+├── src/career_growth/         # Original MVP analytics package
+├── tests/                     # Original pytest suite
 ├── pyproject.toml
 ├── README.md
 └── LICENSE
@@ -75,14 +93,15 @@ career-growth-analytics/
 ## Technology Stack
 
 - Python 3.10+
-- pandas
-- numpy
-- scikit-learn
-- scipy
+- pandas, numpy, scikit-learn, scipy
 - matplotlib / seaborn
 - pydantic
 - pytest
 - Jupyter
+- FastAPI, uvicorn
+- SQLite
+- React, Vite, TypeScript
+- Recharts, lucide-react
 
 No external APIs, payment gateways, or cloud services are used. All data is generated locally.
 
@@ -185,11 +204,45 @@ Formal artifacts under `artifacts/` are committed as deliverables. Key files inc
 - `artifacts/nba_examples.csv` / `nba_examples.json` -- Next Best Action examples
 - `artifacts/plots/*.png` -- PR, ROC, calibration, confusion matrix, risk distribution, and feature importance plots
 
-## Run Tests
+## Run Enterprise Application
+
+### Initialize database
+
+```powershell
+cd C:\Users\Administrator\Desktop\career-growth-analytics
+$env:PYTHONPATH = "src"
+.venv\Scripts\python.exe -m backend.scripts.init_db
+```
+
+### Start backend
 
 ```powershell
 $env:PYTHONPATH = "src"
-.venv\Scripts\python.exe -m pytest tests -q
+.venv\Scripts\uvicorn.exe backend.app.main:app --reload --port 8000
+```
+
+### Start frontend
+
+```powershell
+cd C:\Users\Administrator\Desktop\career-growth-analytics\frontend
+npm install
+npm run dev
+```
+
+Open http://localhost:5173 in a browser.
+
+## Run Tests
+
+```powershell
+$env:PYTHONPATH = "src;backend"
+.venv\Scripts\python.exe -m pytest tests backend/tests -q
+```
+
+## Build Frontend
+
+```powershell
+cd C:\Users\Administrator\Desktop\career-growth-analytics\frontend
+npm run build
 ```
 
 ## Open Notebook
