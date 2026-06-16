@@ -245,6 +245,15 @@ cd C:\Users\Administrator\Desktop\career-growth-analytics\frontend
 npm run build
 ```
 
+## Frontend Pages
+
+- **Overview Dashboard**: KPI cards for platform and model metrics, system health indicator, "What to watch" guidance, and a suggested demo flow.
+- **Funnel**: Bar chart and funnel table with drop-off highlighting and a data-driven business insight.
+- **Retention**: D1/D7/D14 KPI cards and a color-coded cohort retention pivot table.
+- **Experiment**: Onboarding A/B test summary, sample ratio mismatch status, and grouped variant comparison tables.
+- **Churn Risk**: Model performance KPIs, risk distribution chart, subgroup evaluation table, filters, and a high-risk user table.
+- **User Detail**: User profile, churn probability, predicted class, top risk factors, Next Best Action recommendation, and early event timeline.
+
 ## Open Notebook
 
 ```powershell

@@ -8,19 +8,19 @@
 - **Repository**: `C:\Users\Administrator\Desktop\career-growth-analytics`
 - **Project name**: Career Growth Analytics
 - **Business context**: AI career platform user lifecycle growth and experimentation system
-- **Current phase**: Phase 3 Enterprise-level local full-stack system complete
+- **Current phase**: Phase 3 Enterprise-level local full-stack system complete; Frontend Presentation Polish applied
 - **Hard constraints**: productize, API-ify, and visualize the existing MVP capabilities. Do not introduce Kafka, Redis, Postgres, Flink, or similar heavy infrastructure.
 - **Compliance requirement**: do not use any lychas-related code, data, or naming
 
 ## 2. Current Git State
 
-Latest commit at the start of this cleanup task:
+Latest commit at the start of this task:
 
 ```text
-4786878 docs: update HANDOVER.md and PHASE3 report with final commit hash
+1423539 docs: convert tracked Markdown files to English ASCII for Codex acceptance
 ```
 
-Working-directory changes in progress: documentation and ASCII compliance cleanup. They will be committed after this worklog is written.
+Working directory was clean at the start. This session added the Frontend Presentation Polish.
 
 Files created or modified in this cleanup:
 
@@ -80,6 +80,8 @@ In `src/career_growth/data_generation/events.py`:
 
 ### Current Test Status
 
+#### Full Python Test Suite
+
 ```powershell
 cd C:\Users\Administrator\Desktop\career-growth-analytics
 $env:PYTHONPATH = "src;backend"
@@ -118,6 +120,24 @@ backend\tests\test_users.py .....
 
 ================== 73 passed, 1 warning in 537.57s (0:08:57) ==================
 ```
+
+#### Backend Smoke Tests (after frontend polish)
+
+```powershell
+$env:PYTHONPATH = "src;backend"
+.venv\Scripts\python.exe -m pytest backend/tests -q
+```
+
+Result: **15 passed, 1 warning** in 131.15s.
+
+#### Frontend Build
+
+```powershell
+cd C:\Users\Administrator\Desktop\career-growth-analytics\frontend
+npm.cmd run build
+```
+
+Result: build succeeded, output in `frontend/dist/`.
 
 ### Current Data State
 
@@ -295,7 +315,7 @@ npm run dev
 | Artifacts | `artifacts/churn_model.joblib`, `model_metadata.json`, `metrics.json`, `feature_schema.json`, `explainability.json`, `user_explanations.json`, `subgroup_metrics.*`, `nba_examples.*`, `plots/*.png` |
 | Training data (local, not committed) | `data/training/sample/*`, `data/training/processed/*` |
 | Enterprise backend | `backend/app/*`, `backend/scripts/*`, `backend/tests/*` |
-| Enterprise frontend | `frontend/src/*`, `frontend/package.json`, `frontend/vite.config.ts` |
+| Enterprise frontend | `frontend/src/*` (pages, components, api, styles), `frontend/package.json`, `frontend/vite.config.ts` |
 | Enterprise database | `data/app/career_growth.db` |
 | Acceptance reports | `PHASE1_REMEDIATION_REPORT.md`, `PHASE2_MODELING_REPORT.md`, `PHASE3_ENTERPRISE_REPORT.md`, `HANDOVER.md` (this file) |
 
@@ -309,9 +329,9 @@ npm run dev
 
 ## 8. Next Steps
 
-1. Wait for Codex final acceptance of Phase 3.
-2. If Codex requests further remediation, follow the constraints above.
-3. This phase is a local Enterprise system; cloud deployment, authentication/authorization, and real-time stream processing are out of scope unless explicitly requested.
+1. Phase 3 is accepted and the Frontend Presentation Polish is complete.
+2. Use the polished frontend for project walkthroughs and demo videos.
+3. Cloud deployment, authentication/authorization, and real-time stream processing remain out of scope unless explicitly requested.
 
 ---
 
@@ -332,5 +352,9 @@ npm run dev
 ## Appendix B: This Session Summary
 
 - **Session date**: 2026-06-16
-- **Task**: Codex final acceptance was blocked because tracked text files contained non-ASCII characters (Chinese text, Unicode tree symbols, em/en dashes). Converted all flagged tracked Markdown files to professional English ASCII-only text. Replaced Unicode tree symbols with ASCII pipe-and-dash equivalents and em-dashes with ASCII hyphens. Ran ASCII scan and confirmed `NON_ASCII_TRACKED_TEXT_FILES=0`. Updated `HANDOVER.md`, added this worklog, cleaned temporary resources, and committed.
-- **Detailed worklog**: `docs/worklogs/2026-06-16_phase3_ascii-compliance-cleanup.md`
+- **Task**: Frontend Presentation Polish. Refactored the React frontend for a cleaner, more professional internal analytics product experience: improved global layout and navigation, added system name and health status, polished all six dashboard pages with better KPI cards, tables, filters, and data-driven insights, and added loading/error/empty states. Created reusable UI components. Updated `PHASE3_ENTERPRISE_REPORT.md`, `README.md`, and `HANDOVER.md`. Ran backend smoke tests (15 passed), frontend build (succeeded), and ASCII scan (0 non-ASCII occurrences). Cleaned temporary resources and committed.
+- **Detailed worklog**: `docs/worklogs/2026-06-16_frontend-presentation-polish.md`
+
+- **Session date**: 2026-06-16
+- **Task**: Frontend Presentation Polish. Refactored the React frontend for a cleaner, more professional internal analytics product experience: improved global layout and navigation, added system name and health status, polished all six dashboard pages with better KPI cards, tables, filters, and data-driven insights, and added loading/error/empty states. Created reusable UI components. Updated `PHASE3_ENTERPRISE_REPORT.md`, `README.md`, and `HANDOVER.md`. Ran backend smoke tests (15 passed), frontend build (succeeded), and ASCII scan (0 non-ASCII occurrences). Cleaned temporary resources and committed.
+- **Detailed worklog**: `docs/worklogs/2026-06-16_frontend-presentation-polish.md`

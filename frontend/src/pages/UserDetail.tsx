@@ -2,9 +2,19 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { fetchUserDetail } from '../api/client'
 import type { UserDetailResponse } from '../api/types'
+import PageHeader from '../components/PageHeader'
+import SectionCard from '../components/SectionCard'
+import RiskBar from '../components/RiskBar'
+import StatusBadge from '../components/StatusBadge'
+import LoadingState from '../components/LoadingState'
+import ErrorState from '../components/ErrorState'
 
-function formatPercent(value: number): string {
-  return `${(value * 100).toFixed(1)}%`
+function formatTimestamp(value: string): string {
+  try {
+    return new Date(value).toLocaleString()
+  } catch {
+    return value
+  }
 }
 
 export default function UserDetail() {
@@ -19,78 +29,113 @@ export default function UserDetail() {
       .catch((err) => setError(err.message))
   }, [userId])
 
-  if (error) return <div className="error">Error: {error}</div>
-  if (!data) return <div className="loading">Loading user detail...</div>
+  if (error) {
+    return (
+      <ErrorState
+        title="User not found"
+        message={error.includes('404') ? `No user found for ID ${userId}.` : error}
+      />
+    )
+  }
+  if (!data) return <LoadingState message="Loading user detail..." />
 
   const profile = data.profile
 
   return (
     <div>
-      <h1 className="page-title">User Detail</h1>
+      <PageHeader title="User Detail" subtitle="Profile, churn risk, key drivers, and recommended action." />
 
-      <div className="card">
-        <h2>Profile</h2>
-        <table className="table">
-          <tbody>
-            <tr>
-              <td>User ID</td>
-              <td>{data.user_id}</td>
-            </tr>
-            <tr>
-              <td>Acquisition Channel</td>
-              <td>{String(profile.acquisition_channel)}</td>
-            </tr>
-            <tr>
-              <td>Career Stage</td>
-              <td>{String(profile.career_stage)}</td>
-            </tr>
-            <tr>
-              <td>Device Type</td>
-              <td>{String(profile.device_type)}</td>
-            </tr>
-            <tr>
-              <td>Intent Level</td>
-              <td>{String(profile.user_intent_level)}</td>
-            </tr>
-            <tr>
-              <td>Marketing Consent</td>
-              <td>{profile.marketing_consent ? 'Yes' : 'No'}</td>
-            </tr>
-            <tr>
-              <td>Signup Time</td>
-              <td>{String(profile.signup_timestamp)}</td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="card" style={{ marginBottom: 20 }}>
+        <div className="profile-grid">
+          <div className="profile-item">
+            <span className="profile-label">User ID</span>
+            <span className="profile-value">{data.user_id}</span>
+          </div>
+          <div className="profile-item">
+            <span className="profile-label">Churn Probability</span>
+            <span className="profile-value">
+              <RiskBar probability={data.churn_probability} />
+            </span>
+          </div>
+          <div className="profile-item">
+            <span className="profile-label">Predicted Class</span>
+            <span className="profile-value">
+              {data.predicted_class ? (
+                <StatusBadge status="error" label="High Risk" />
+              ) : (
+                <StatusBadge status="ok" label="Low Risk" />
+              )}
+            </span>
+          </div>
+          <div className="profile-item">
+            <span className="profile-label">Recommended Action</span>
+            <span className="profile-value">{data.recommended_action}</span>
+          </div>
+          <div className="profile-item">
+            <span className="profile-label">Channel</span>
+            <span className="profile-value">{data.channel}</span>
+          </div>
+        </div>
       </div>
 
-      <div className="card">
-        <h2>Churn Prediction</h2>
-        <p>
-          Risk:{' '}
-          <strong className={data.predicted_class ? 'metric-negative' : 'metric-positive'}>
-            {formatPercent(data.churn_probability)}
-          </strong>
-        </p>
-        <p>
-          Predicted class:{' '}
-          <span className={data.predicted_class ? 'badge badge-high' : 'badge badge-low'}>
-            {data.predicted_class ? 'High Risk' : 'Low Risk'}
-          </span>
-        </p>
-        <p>
-          Recommended Action: <strong>{data.recommended_action}</strong> via {data.channel}
-        </p>
-        <p>Reason: {data.reason}</p>
+      <div className="two-column">
+        <SectionCard title="Profile">
+          <div className="profile-grid">
+            <div className="profile-item">
+              <span className="profile-label">Acquisition Channel</span>
+              <span className="profile-value">{profile.acquisition_channel ?? '-'}</span>
+            </div>
+            <div className="profile-item">
+              <span className="profile-label">Country</span>
+              <span className="profile-value">{profile.country ?? '-'}</span>
+            </div>
+            <div className="profile-item">
+              <span className="profile-label">Device Type</span>
+              <span className="profile-value">{profile.device_type ?? '-'}</span>
+            </div>
+            <div className="profile-item">
+              <span className="profile-label">Career Stage</span>
+              <span className="profile-value">{profile.career_stage ?? '-'}</span>
+            </div>
+            <div className="profile-item">
+              <span className="profile-label">Intent Level</span>
+              <span className="profile-value">{profile.user_intent_level ?? '-'}</span>
+            </div>
+            <div className="profile-item">
+              <span className="profile-label">Marketing Consent</span>
+              <span className="profile-value">{profile.marketing_consent ? 'Yes' : 'No'}</span>
+            </div>
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Next Best Action">
+          <div className="profile-grid">
+            <div className="profile-item">
+              <span className="profile-label">Action</span>
+              <span className="profile-value">{data.recommended_action}</span>
+            </div>
+            <div className="profile-item">
+              <span className="profile-label">Channel</span>
+              <span className="profile-value">{data.channel}</span>
+            </div>
+            <div className="profile-item" style={{ gridColumn: '1 / -1' }}>
+              <span className="profile-label">Reason</span>
+              <span className="profile-value">{data.reason}</span>
+            </div>
+          </div>
+        </SectionCard>
       </div>
 
-      <div className="card">
-        <h2>Top Risk Factors</h2>
+      <SectionCard title="Top Risk Factors">
+        <p className="section-subtitle">
+          Features that push the model toward a high or low churn prediction.
+        </p>
         <table className="table">
           <thead>
             <tr>
               <th>Feature</th>
               <th>Contribution</th>
+              <th>Direction</th>
             </tr>
           </thead>
           <tbody>
@@ -98,33 +143,50 @@ export default function UserDetail() {
               <tr key={idx}>
                 <td>{item.feature}</td>
                 <td>{item.contribution.toFixed(4)}</td>
+                <td>
+                  {item.contribution > 0 ? (
+                    <span className="badge badge-high">Higher risk</span>
+                  ) : item.contribution < 0 ? (
+                    <span className="badge badge-low">Lower risk</span>
+                  ) : (
+                    <span className="badge badge-info">Neutral</span>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
+      </SectionCard>
 
-      <div className="card">
-        <h2>Early Event Timeline</h2>
+      <SectionCard title="Early Event Timeline">
+        <p className="section-subtitle">Events before the 7-day prediction cutoff.</p>
         <table className="table">
           <thead>
             <tr>
-              <th>Time</th>
+              <th>Timestamp</th>
               <th>Event</th>
               <th>Source</th>
             </tr>
           </thead>
           <tbody>
-            {data.timeline.map((event, idx) => (
-              <tr key={idx}>
-                <td>{String(event.event_timestamp)}</td>
-                <td>{String(event.event_name)}</td>
-                <td>{String(event.event_source)}</td>
+            {data.timeline.length === 0 ? (
+              <tr>
+                <td colSpan={3} style={{ textAlign: 'center', color: '#6b7280' }}>
+                  No events before cutoff.
+                </td>
               </tr>
-            ))}
+            ) : (
+              data.timeline.map((event, idx) => (
+                <tr key={idx}>
+                  <td>{formatTimestamp(event.event_timestamp)}</td>
+                  <td>{event.event_name}</td>
+                  <td>{event.event_source}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
-      </div>
+      </SectionCard>
     </div>
   )
 }

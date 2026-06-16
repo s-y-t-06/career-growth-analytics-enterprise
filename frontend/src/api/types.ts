@@ -30,11 +30,19 @@ export interface FunnelResponse {
   steps: FunnelStep[]
 }
 
+export interface CohortRow {
+  signup_week: string
+  day: number
+  users: number
+  retained: number
+  retention_rate: number
+}
+
 export interface RetentionResponse {
   d1_retention: number
   d7_retention: number
   d14_retention: number
-  cohorts: Array<Record<string, unknown>>
+  cohorts: CohortRow[]
 }
 
 export interface ExperimentMetric {
@@ -65,8 +73,20 @@ export interface ModelMetricsResponse {
   confusion_matrix: Record<string, number>
 }
 
+export interface Subgroup {
+  group_column: string
+  group_value: string
+  sample_size: number
+  churn_rate: number
+  precision: number
+  recall: number
+  f1_score: number
+  predicted_positive_rate: number
+  small_sample: boolean
+}
+
 export interface SubgroupResponse {
-  groups: Array<Record<string, unknown>>
+  groups: Subgroup[]
 }
 
 export interface UserSummary {
@@ -85,17 +105,40 @@ export interface UserListResponse {
   total: number
 }
 
+export interface UserProfile {
+  acquisition_channel: string | null
+  country: string | null
+  device_type: string | null
+  user_intent_level: string | null
+  career_stage: string | null
+  marketing_consent: boolean
+  language: string | null
+  timezone: string | null
+  signup_timestamp: string
+}
+
+export interface ModelExplanation {
+  feature: string
+  contribution: number
+}
+
+export interface TimelineEvent {
+  event_name: string
+  event_timestamp: string
+  event_source: string
+}
+
 export interface UserDetailResponse {
   user_id: string
-  profile: Record<string, unknown>
+  profile: UserProfile
   features: Record<string, unknown>
   churn_probability: number
   predicted_class: number
-  explanation: Array<{ feature: string; contribution: number }>
+  explanation: ModelExplanation[]
   recommended_action: string
   channel: string
   reason: string
-  timeline: Array<Record<string, unknown>>
+  timeline: TimelineEvent[]
 }
 
 export interface ScoreResponse {

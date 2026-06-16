@@ -216,10 +216,77 @@ Result: build succeeded, output in `frontend/dist/`.
 
 `42dd34f feat: Phase 3 Enterprise-level local full-stack system`
 
-## 13. Temporary Resources Released
+## 13. Frontend Presentation Polish
+
+After the initial Phase 3 acceptance, the frontend presentation was refined to make the dashboard read like a real internal analytics product for interviews and demos.
+
+### 13.1 UX Improvements
+
+- **Global layout**: topbar with system name "Career Growth Analytics" and product context "AI Career Platform Lifecycle Growth System"; backend health indicator (API Online / Model Loaded / Data Ready); improved sidebar brand and active navigation states; backend unavailable banner.
+- **Overview**: subtitle explaining business purpose; KPI cards for Users, Events, Churn Rate, D7 Retention, Selected Model, Test PR-AUC, Test ROC-AUC, Test F1 with helper text; "What to watch" section; "Demo flow" walkthrough hint.
+- **Funnel**: clearer bar chart; table with Step, Users, Conversion Rate, Drop-off Rate; highest drop-off step highlighted; auto-generated business insight.
+- **Retention**: D1/D7/D14 KPI cards; cohort retention shown as a pivot table with color-coded retention levels.
+- **Experiment**: experiment ID and SRM p-value summary; "Healthy allocation" / "Potential SRM risk" status; metric tables grouped into Activation, Profile, and Retention; explicit synthetic experiment demonstration notice.
+- **Churn Risk**: model metric KPI cards (PR-AUC, ROC-AUC, Brier, F1, Threshold); risk distribution chart; subgroup performance table with precision, recall, F1, and small-sample flags; filters for min risk, acquisition channel, and career stage; high-risk user table with risk bars.
+- **User Detail**: header showing user ID, churn probability, predicted class, recommended action, and channel; profile grid; Next Best Action block; top risk factors with direction labels; early event timeline.
+- **States**: loading, error, empty, and backend-unavailable states added across pages.
+
+### 13.2 New Frontend Components
+
+- `frontend/src/components/PageHeader.tsx`
+- `frontend/src/components/KpiCard.tsx`
+- `frontend/src/components/SectionCard.tsx`
+- `frontend/src/components/StatusBadge.tsx`
+- `frontend/src/components/LoadingState.tsx`
+- `frontend/src/components/ErrorState.tsx`
+- `frontend/src/components/EmptyState.tsx`
+- `frontend/src/components/RiskBar.tsx`
+
+### 13.3 Updated Frontend Files
+
+- `frontend/src/App.tsx` (routes unchanged)
+- `frontend/src/components/Layout.tsx`
+- `frontend/src/index.css`
+- `frontend/src/pages/Overview.tsx`
+- `frontend/src/pages/Funnel.tsx`
+- `frontend/src/pages/Retention.tsx`
+- `frontend/src/pages/Experiment.tsx`
+- `frontend/src/pages/ChurnRisk.tsx`
+- `frontend/src/pages/UserDetail.tsx`
+- `frontend/src/api/types.ts`
+- `frontend/src/api/client.ts` (unchanged)
+
+### 13.4 Frontend Presentation Polish Test Results
+
+Backend smoke tests:
+
+```powershell
+$env:PYTHONPATH = "src;backend"
+.venv\Scripts\python.exe -m pytest backend\tests -q
+```
+
+Result: **15 passed, 1 warning** in 131.15s.
+
+Frontend build:
+
+```powershell
+cd frontend
+npm run build
+```
+
+Result: build succeeded, output in `frontend/dist/`.
+
+ASCII scan:
+
+```text
+NON_ASCII_TRACKED_TEXT_FILES=0
+NON_ASCII_OCCURRENCES=0
+```
+
+## 14. Temporary Resources Released
 
 - `.pytest_cache`
 - `__pycache__` directories
 - `.ipynb_checkpoints`
 - `_tmp_*` helper scripts
-- Frontend build cache is retained in `frontend/dist/` as a build artifact; `node_modules/` is ignored by git.
+- Frontend build output `frontend/dist/` is generated on demand and not committed; `node_modules/` is ignored by git.
