@@ -19,10 +19,10 @@ Hidden propensity variables exist only inside the data generator and are never w
 
 For each user we draw four latent variables from Beta distributions:
 
-- `intrinsic_engagement` ~ Beta(2, 2) — general tendency to engage.
-- `career_urgency` ~ Beta(2.5, 2) — how urgently the user needs career help.
-- `product_fit` ~ Beta(2, 2) — how well the product matches the user's needs.
-- `notification_sensitivity` ~ Beta(2, 3) — responsiveness to prompts.
+- `intrinsic_engagement` ~ Beta(2, 2) - general tendency to engage.
+- `career_urgency` ~ Beta(2.5, 2) - how urgently the user needs career help.
+- `product_fit` ~ Beta(2, 2) - how well the product matches the user's needs.
+- `notification_sensitivity` ~ Beta(2, 3) - responsiveness to prompts.
 
 These variables influence event probabilities but are not observable by the model.
 

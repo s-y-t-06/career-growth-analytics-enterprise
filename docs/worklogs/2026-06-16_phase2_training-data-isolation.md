@@ -1,56 +1,56 @@
-# Phase 2 收尾：训练数据目录隔离
+# Worklog: Phase 2 Wrap-Up - Training Data Directory Isolation
 
-## 会话信息
+## Session Information
 
-- **日期**：2026-06-16
-- **项目阶段**：Phase 2 流失预测建模
-- **任务类型**：阻塞问题修复（不进入 Phase 3）
-- **执行环境**：Windows PowerShell
-- **真实基础 Python**：`C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows-x86_64-none\python.exe`
-- **项目虚拟环境**：`C:\Users\Administrator\Desktop\career-growth-analytics\.venv\Scripts\python.exe`
-- **提交 hash**：`bf08265 fix: isolate 5,000-user training data from committed sample data`
+- **Date**: 2026-06-16
+- **Project phase**: Phase 2 churn prediction modeling
+- **Task type**: Blocker fix (do not enter Phase 3)
+- **Execution environment**: Windows PowerShell
+- **Real base Python**: `C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows-x86_64-none\python.exe`
+- **Project virtual environment**: `C:\Users\Administrator\Desktop\career-growth-analytics\.venv\Scripts\python.exe`
+- **Commit hash**: `bf08265 fix: isolate 5,000-user training data from committed sample data`
 
-## 问题描述
+## Problem Description
 
-Codex Phase 2 核心验收已 56/56 tests passed、5,000 用户训练成功、Notebook 执行成功、ASCII scan clean、artifacts 存在。
+Codex Phase 2 core acceptance had already passed: 56/56 tests passed, 5,000-user training succeeded, notebook executed successfully, ASCII scan clean, artifacts present.
 
-唯一阻塞问题：运行
+The only blocker: running
 
 ```powershell
 .venv\Scripts\python.exe scripts\train_churn_model.py --count 5000 --seed 42
 ```
 
-默认会把生成的 5,000 用户数据写入 `data/sample/` 和 `data/processed/labels.csv`，覆盖仓库正式提交的 1,000 用户 sample 数据。
+wrote the generated 5,000-user data into `data/sample/` and `data/processed/labels.csv`, overwriting the committed 1,000-user sample data.
 
-## 整改内容
+## Remediation Content
 
-1. **修改 `scripts/train_churn_model.py`**
-   - `--data-dir` 默认值从 `"data"` 改为 `"data/training"`。
-   - 更新 help 文本，说明默认训练目录不会覆盖正式 sample 数据。
-   - `parse_args()` 增加可选 `argv` 参数，便于单元测试注入空参数列表。
+1. **Modify `scripts/train_churn_model.py`**
+   - Changed `--data-dir` default from `"data"` to `"data/training"`.
+   - Updated help text to explain that the default training directory does not overwrite committed sample data.
+   - Added optional `argv` parameter to `parse_args()` so unit tests can inject an empty argument list.
 
-2. **修改 `src/career_growth/features/model_features.py`**
-   - `save_model_features` 默认输出路径从 `data/processed/model_features.csv` 改为 `data/training/processed/model_features.csv`，与训练脚本默认目录一致。
+2. **Modify `src/career_growth/features/model_features.py`**
+   - Changed `save_model_features` default output path from `data/processed/model_features.csv` to `data/training/processed/model_features.csv`, matching the training script default directory.
 
-3. **更新 `.gitignore`**
-   - 新增 `data/training/` 忽略规则，并补充说明。
+3. **Update `.gitignore`**
+   - Added `data/training/` ignore rule with explanation.
 
-4. **移除污染文件**
-   - 删除已提交的 `data/processed/model_features.csv`（该文件实际为 5,000 用户训练输出，不属于 1,000 用户 sample 数据）。
-   - 今后训练生成的 `model_features.csv` 统一写入 `data/training/processed/model_features.csv`。
+4. **Remove Contaminated File**
+   - Deleted the committed `data/processed/model_features.csv` (it was actually a 5,000-user training output and did not belong to the 1,000-user sample data).
+   - Future `model_features.csv` outputs are written uniformly to `data/training/processed/model_features.csv`.
 
-5. **新增测试 `tests/test_train_script.py`**
-   - `test_default_data_dir_is_training`：验证训练脚本默认数据目录为 `data/training`。
-   - `test_training_script_respects_data_dir_and_does_not_touch_sample`：以子进程运行训练脚本（200 用户），验证生成数据只写入配置的 `data-dir`，且 `data/sample/users.csv` 与 `data/processed/labels.csv` 内容保持不变。
+5. **Add Test `tests/test_train_script.py`**
+   - `test_default_data_dir_is_training`: verifies the training script default data directory is `data/training`.
+   - `test_training_script_respects_data_dir_and_does_not_touch_sample`: runs the training script as a subprocess with 200 users, verifies generated data is written only to the configured `data-dir`, and verifies that `data/sample/users.csv` and `data/processed/labels.csv` remain unchanged.
 
-6. **更新文档**
-   - `README.md`：训练命令说明中明确训练数据写入 `data/training/`，`model_features.csv` 路径更新为 `data/training/processed/model_features.csv`。
-   - `PHASE2_MODELING_REPORT.md`：第 7 节 Artifacts 说明更新。
-   - `HANDOVER.md`：数据状态与关键文件清单更新。
+6. **Update Documentation**
+   - `README.md`: training command description now states training data is written to `data/training/`; `model_features.csv` path updated to `data/training/processed/model_features.csv`.
+   - `PHASE2_MODELING_REPORT.md`: section 7 artifact description updated.
+   - `HANDOVER.md`: data state and key file inventory updated.
 
-## 复验命令与结果
+## Re-verification Commands and Results
 
-### Full tests
+### Full Tests
 
 ```powershell
 cd C:\Users\Administrator\Desktop\career-growth-analytics
@@ -58,7 +58,7 @@ $env:PYTHONPATH = "src"
 .venv\Scripts\python.exe -m pytest tests -q
 ```
 
-结果：
+Result:
 
 ```text
 ============================= test session starts =============================
@@ -72,8 +72,8 @@ tests\test_analytics.py ...........
 tests\test_data_generation.py .........
 tests\test_decisions.py ..
 tests\test_features.py ...
-tests\test_model_features.py ........
-tests\test_modeling.py ...............
+tests\test_model_features.py .......
+tests\test_modeling.py ............
 tests\test_nba_integration.py ....
 tests\test_train_script.py ..
 tests\test_validation.py ....
@@ -81,14 +81,14 @@ tests\test_validation.py ....
 ======================= 58 passed in 351.85s (0:05:51) ========================
 ```
 
-### 5,000 用户训练
+### 5,000-User Training
 
 ```powershell
 $env:PYTHONPATH = "src"
 .venv\Scripts\python.exe scripts\train_churn_model.py --count 5000 --seed 42
 ```
 
-结果：
+Result:
 
 ```text
 Generating 5000 users with seed 42
@@ -104,7 +104,7 @@ Saved plots to artifacts\plots
 Training complete.
 ```
 
-训练指标与整改前完全一致：
+Training metrics are identical to before the fix:
 
 | Metric | Value |
 |---|---|
@@ -114,7 +114,7 @@ Training complete.
 | F1 score | 0.5884 |
 | Threshold | 0.41 |
 
-### 数据隔离验证
+### Data Isolation Verification
 
 ```text
 sample users: 1000
@@ -123,42 +123,42 @@ sample labels: 1000
 training labels: 5000
 ```
 
-- `data/sample/users.csv` 仍为 1,000 用户。
-- `data/processed/labels.csv` 仍为 1,000 用户。
-- 5,000 用户训练数据仅写入 `data/training/sample/` 与 `data/training/processed/`。
+- `data/sample/users.csv` remains 1,000 users.
+- `data/processed/labels.csv` remains 1,000 users.
+- 5,000-user training data is written only to `data/training/sample/` and `data/training/processed/`.
 
-### ASCII scan
+### ASCII Scan
 
-已确认 `src/`、`tests/`、`scripts/` 下 Python 文件无非 ASCII 字符。
+Confirmed that Python files under `src/`, `tests/`, and `scripts/` contain no non-ASCII characters.
 
-### git status
+### Git Status
 
-训练后工作目录仅包含预期变更：
+After training, the working directory contained only expected changes:
 
-- 修改：`.gitignore`、`HANDOVER.md`、`PHASE2_MODELING_REPORT.md`、`README.md`、`scripts/train_churn_model.py`、`src/career_growth/features/model_features.py`
-- 修改：`artifacts/churn_model.joblib`、`artifacts/model_metadata.json`（时间戳更新）
-- 删除：`data/processed/model_features.csv`
-- 新增：`tests/test_train_script.py`
+- Modified: `.gitignore`, `HANDOVER.md`, `PHASE2_MODELING_REPORT.md`, `README.md`, `scripts/train_churn_model.py`, `src/career_growth/features/model_features.py`
+- Modified: `artifacts/churn_model.joblib`, `artifacts/model_metadata.json` (timestamp updated)
+- Deleted: `data/processed/model_features.csv`
+- Added: `tests/test_train_script.py`
 
-`data/training/` 已被 `.gitignore` 忽略，未出现在 git status 中。
+`data/training/` is ignored by `.gitignore` and does not appear in `git status`.
 
-## 临时资源清理
+## Temporary Resource Cleanup
 
-已清理：
+Cleaned:
 
 - `.pytest_cache`
-- 全部 `__pycache__`
-- `.ipynb_checkpoints`（不存在）
+- All `__pycache__` directories
+- `.ipynb_checkpoints` (did not exist)
 
-保留：
+Retained:
 
 - `.venv/`
-- `data/sample/` 与 `data/processed/labels.csv`（正式 1,000 用户 sample 数据）
-- `data/training/`（本地 5,000 用户训练数据，被 git 忽略）
-- `artifacts/` 正式产物
-- 文档与 Notebook
+- `data/sample/` and `data/processed/labels.csv` (committed 1,000-user sample data)
+- `data/training/` (local 5,000-user training data, ignored by git)
+- `artifacts/` formal deliverables
+- Documentation and notebooks
 
-## 未完成事项
+## Open Items
 
-- 未开始 API、数据库、前端或 Phase 3。
-- 等待 Codex 最终确认本阻塞问题已解决。
+- API, database, frontend, and Phase 3 were not started.
+- Waiting for Codex final confirmation that this blocker is resolved.

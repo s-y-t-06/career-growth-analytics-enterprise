@@ -8,40 +8,40 @@ The Phase 3 Enterprise system turns the existing MVP analytics and churn predict
 
 ```text
 career-growth-analytics/
-├── backend/
-│   ├── app/
-│   │   ├── main.py                 # FastAPI app and router registration
-│   │   ├── config.py               # Paths and constants
-│   │   ├── database.py             # SQLite connection and schema creation
-│   │   ├── schemas.py              # Pydantic request/response models
-│   │   ├── services/               # Business logic
-│   │   │   ├── data_service.py     # CSV/artifact loading and DB seeding
-│   │   │   ├── analytics_service.py # Funnel, retention, experiment analytics
-│   │   │   ├── model_service.py    # Model scoring and explanations
-│   │   │   └── nba_service.py      # Next Best Action service
-│   │   └── routers/                # API endpoints
-│   │       ├── health.py
-│   │       ├── overview.py
-│   │       ├── funnel.py
-│   │       ├── retention.py
-│   │       ├── experiment.py
-│   │       ├── model.py
-│   │       ├── users.py
-│   │       └── nba.py
-│   ├── scripts/
-│   │   └── init_db.py              # Initialize and seed SQLite database
-│   └── tests/                      # Backend pytest suite
-├── frontend/                       # React + Vite + TypeScript
-│   ├── src/
-│   │   ├── api/                    # API client and TypeScript types
-│   │   ├── components/             # Layout, shared UI
-│   │   ├── pages/                  # Dashboard pages
-│   │   ├── App.tsx
-│   │   └── main.tsx
-│   └── package.json
-├── data/app/
-│   └── career_growth.db            # Local SQLite database
-└── artifacts/                      # Existing model artifacts
+|-- backend/
+|   |-- app/
+|   |   |-- main.py                 # FastAPI app and router registration
+|   |   |-- config.py               # Paths and constants
+|   |   |-- database.py             # SQLite connection and schema creation
+|   |   |-- schemas.py              # Pydantic request/response models
+|   |   |-- services/               # Business logic
+|   |   |   |-- data_service.py     # CSV/artifact loading and DB seeding
+|   |   |   |-- analytics_service.py # Funnel, retention, experiment analytics
+|   |   |   |-- model_service.py    # Model scoring and explanations
+|   |   |   |-- nba_service.py      # Next Best Action service
+|   |   |-- routers/                # API endpoints
+|   |   |   |-- health.py
+|   |   |   |-- overview.py
+|   |   |   |-- funnel.py
+|   |   |   |-- retention.py
+|   |   |   |-- experiment.py
+|   |   |   |-- model.py
+|   |   |   |-- users.py
+|   |   |   |-- nba.py
+|   |-- scripts/
+|   |   |-- init_db.py              # Initialize and seed SQLite database
+|   |-- tests/                      # Backend pytest suite
+|-- frontend/                       # React + Vite + TypeScript
+|   |-- src/
+|   |   |-- api/                    # API client and TypeScript types
+|   |   |-- components/             # Layout, shared UI
+|   |   |-- pages/                  # Dashboard pages
+|   |   |-- App.tsx
+|   |   |-- main.tsx
+|   |-- package.json
+|-- data/app/
+|   |-- career_growth.db            # Local SQLite database
+|-- artifacts/                      # Existing model artifacts
 ```
 
 ## Data Flow

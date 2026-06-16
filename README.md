@@ -45,49 +45,49 @@ signup
 
 ```
 career-growth-analytics/
-├── backend/                   # FastAPI enterprise backend
-│   ├── app/                   # Application code
-│   │   ├── main.py            # FastAPI entry point
-│   │   ├── routers/           # API endpoints
-│   │   ├── services/          # Business logic
-│   │   ├── database.py        # SQLite utilities
-│   │   └── schemas.py         # Pydantic models
-│   ├── scripts/               # Backend CLI scripts
-│   │   └── init_db.py         # Initialize SQLite database
-│   └── tests/                 # Backend pytest suite
-├── data/
-│   ├── sample/                # Generated CSV files (users, events, experiments, interventions)
-│   ├── processed/             # Derived outputs such as labels
-│   ├── app/                   # Local SQLite database
-│   └── training/              # Local 5,000-user training data (ignored by git)
-├── docs/
-│   ├── data_schema.md         # Full data schema
-│   ├── methodology.md         # Generation and label methodology
-│   ├── model_card.md          # Model card
-│   ├── enterprise_architecture.md  # Enterprise system architecture
-│   └── api_reference.md       # API reference
-├── frontend/                  # React + Vite + TypeScript frontend
-│   ├── src/
-│   │   ├── api/               # API client and types
-│   │   ├── components/        # Shared UI components
-│   │   ├── pages/             # Dashboard pages
-│   │   ├── App.tsx
-│   │   └── main.tsx
-│   └── package.json
-├── notebooks/
-│   ├── lifecycle_analysis.ipynb   # End-to-end exploratory analysis
-│   └── churn_modeling.ipynb       # Churn prediction modeling
-├── scripts/
-│   ├── generate_data.py       # CLI to regenerate synthetic data
-│   ├── run_analysis.py        # CLI to run validation and analytics
-│   ├── compute_summary.py     # CLI to print a concise summary
-│   ├── build_notebook.py      # CLI to execute the notebook from the command line
-│   └── train_churn_model.py   # CLI to train churn models
-├── src/career_growth/         # Original MVP analytics package
-├── tests/                     # Original pytest suite
-├── pyproject.toml
-├── README.md
-└── LICENSE
+|-- backend/                   # FastAPI enterprise backend
+|   |-- app/                   # Application code
+|   |   |-- main.py            # FastAPI entry point
+|   |   |-- routers/           # API endpoints
+|   |   |-- services/          # Business logic
+|   |   |-- database.py        # SQLite utilities
+|   |   |-- schemas.py         # Pydantic models
+|   |-- scripts/               # Backend CLI scripts
+|   |   |-- init_db.py         # Initialize SQLite database
+|   |-- tests/                 # Backend pytest suite
+|-- data/
+|   |-- sample/                # Generated CSV files (users, events, experiments, interventions)
+|   |-- processed/             # Derived outputs such as labels
+|   |-- app/                   # Local SQLite database
+|   |-- training/              # Local 5,000-user training data (ignored by git)
+|-- docs/
+|   |-- data_schema.md         # Full data schema
+|   |-- methodology.md         # Generation and label methodology
+|   |-- model_card.md          # Model card
+|   |-- enterprise_architecture.md  # Enterprise system architecture
+|   |-- api_reference.md       # API reference
+|-- frontend/                  # React + Vite + TypeScript frontend
+|   |-- src/
+|   |   |-- api/               # API client and types
+|   |   |-- components/        # Shared UI components
+|   |   |-- pages/             # Dashboard pages
+|   |   |-- App.tsx
+|   |   |-- main.tsx
+|   |-- package.json
+|-- notebooks/
+|   |-- lifecycle_analysis.ipynb   # End-to-end exploratory analysis
+|   |-- churn_modeling.ipynb       # Churn prediction modeling
+|-- scripts/
+|   |-- generate_data.py       # CLI to regenerate synthetic data
+|   |-- run_analysis.py        # CLI to run validation and analytics
+|   |-- compute_summary.py     # CLI to print a concise summary
+|   |-- build_notebook.py      # CLI to execute the notebook from the command line
+|   |-- train_churn_model.py   # CLI to train churn models
+|-- src/career_growth/         # Original MVP analytics package
+|-- tests/                     # Original pytest suite
+|-- pyproject.toml
+|-- README.md
+|-- LICENSE
 ```
 
 ## Technology Stack
