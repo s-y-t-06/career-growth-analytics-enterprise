@@ -8,6 +8,7 @@
 - **执行环境**：Windows PowerShell
 - **真实基础 Python**：`C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows-x86_64-none\python.exe`
 - **项目虚拟环境**：`C:\Users\Administrator\Desktop\career-growth-analytics\.venv\Scripts\python.exe`
+- **提交 hash**：`bf08265 fix: isolate 5,000-user training data from committed sample data`
 
 ## 问题描述
 

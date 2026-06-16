@@ -23,7 +23,7 @@
 当前最新 commit：
 
 `\text
-3083933 docs: update HANDOVER.md with final Phase 2 commit hash
+bf08265 fix: isolate 5,000-user training data from committed sample data
 `
 
 本次修改文件：
