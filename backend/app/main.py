@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.app.database import init_database
+from backend.app.database import get_connection, init_database
 from backend.app.routers import (
     experiment,
     funnel,
@@ -18,10 +18,24 @@ from backend.app.routers import (
 )
 
 
+def _database_is_empty() -> bool:
+    """Check whether the SQLite database has been seeded."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM users")
+    count = cursor.fetchone()[0]
+    conn.close()
+    return count == 0
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """应用启动时初始化本地数据库。"""
+    """应用启动时初始化本地数据库，若为空则自动 seed。"""
     init_database()
+    if _database_is_empty():
+        from backend.app.services.data_service import seed_database
+
+        seed_database()
     yield
 
 

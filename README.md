@@ -34,7 +34,7 @@ signup
 ## 目录结构
 
 ```text
-career-growth-analytics/
+career-growth-analytics-enterprise/
 |-- backend/                   # FastAPI 后端
 |   |-- app/
 |   |   |-- main.py            # API 入口
@@ -70,26 +70,39 @@ career-growth-analytics/
 
 ## 本地启动
 
-安装 Python 依赖：
+克隆仓库并进入目录：
 
 ```powershell
-cd career-growth-analytics
+git clone https://github.com/s-y-t-06/career-growth-analytics-enterprise.git
+cd career-growth-analytics-enterprise
+```
+
+创建虚拟环境并安装依赖：
+
+```powershell
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install --upgrade pip
 .venv\Scripts\python.exe -m pip install -e ".[dev]"
 ```
 
 初始化后端数据库并启动 API：
 
 ```powershell
-cd career-growth-analytics
 $env:PYTHONPATH = "src"
 .venv\Scripts\python.exe -m backend.scripts.init_db
 .venv\Scripts\uvicorn.exe backend.app.main:app --reload --port 8000
 ```
 
+说明：
+
+- `backend.scripts.init_db` 会根据 `data/sample/` 和 `data/processed/` 初始化并填充本地 SQLite 数据库。
+- 该数据库位于 `data/app/career_growth.db`，仅存储在评审机器本地，不是云端部署。
+- 启动 FastAPI 时如果检测到 SQLite 为空，应用会自动执行 seed，保证演示可复现。
+
 启动前端：
 
 ```powershell
-cd career-growth-analytics\frontend
+cd career-growth-analytics-enterprise\frontend
 npm install
 npm run dev
 ```
@@ -111,12 +124,32 @@ npm run dev
 - Churn Risk：展示模型指标、风险分布和分群风险。
 - User Detail：展示单用户画像、风险因素和 Next Best Action。
 
-## 验证命令
+## 测试
+
+### Smoke test（快速验证）
+
+用于评审快速确认后端 API 和核心服务能跑。主要覆盖 health、overview、funnel、retention、experiment、model、users 和 NBA 接口，通常在 2-3 分钟内完成。
 
 ```powershell
-$env:PYTHONPATH = "src"
+cd career-growth-analytics-enterprise
+$env:PYTHONPATH = "src;backend"
+.venv\Scripts\python.exe -m pytest backend\tests -q
+```
+
+### Full test（完整测试）
+
+完整运行全部 MVP 和后端测试，包含数据生成、建模、特征工程和训练脚本，耗时较长（约 8-10 分钟，具体取决于机器）。
+
+```powershell
+cd career-growth-analytics-enterprise
+$env:PYTHONPATH = "src;backend"
 .venv\Scripts\python.exe -m pytest tests backend\tests -q
-cd frontend
+```
+
+### 前端构建验证
+
+```powershell
+cd career-growth-analytics-enterprise\frontend
 npm run build
 ```
 

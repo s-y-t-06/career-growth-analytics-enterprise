@@ -207,10 +207,10 @@ export default function ChurnRisk() {
                 <th>User ID</th>
                 <th>Risk</th>
                 <th>Class</th>
-                <th>Channel</th>
+                <th>Acquisition Channel</th>
                 <th>Career Stage</th>
                 <th>Recommended Action</th>
-                <th>Channel</th>
+                <th>Recommended Channel</th>
                 <th></th>
               </tr>
             </thead>

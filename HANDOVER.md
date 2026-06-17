@@ -14,12 +14,20 @@
 ## 关键命令
 
 ```powershell
-cd career-growth-analytics
+cd career-growth-analytics-enterprise
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install --upgrade pip
+.venv\Scripts\python.exe -m pip install -e ".[dev]"
+```
+
+```powershell
+cd career-growth-analytics-enterprise
 $env:PYTHONPATH = "src"
-.venv\Scripts\python.exe -m pytest tests backend\tests -q
 .venv\Scripts\python.exe -m backend.scripts.init_db
 .venv\Scripts\uvicorn.exe backend.app.main:app --reload --port 8000
 ```
+
+说明：启动后端前必须先运行 `backend.scripts.init_db` 初始化本地 SQLite 数据库。数据库位于 `data/app/career_growth.db`，仅保存在评审机器本地，不是云端部署。FastAPI 启动时也会检测数据库是否为空，若为空会自动 seed。
 
 ```powershell
 cd career-growth-analytics\frontend
