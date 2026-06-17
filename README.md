@@ -73,14 +73,14 @@ career-growth-analytics/
 安装 Python 依赖：
 
 ```powershell
-cd C:\Users\Administrator\Desktop\career-growth-analytics
+cd career-growth-analytics
 .venv\Scripts\python.exe -m pip install -e ".[dev]"
 ```
 
 初始化后端数据库并启动 API：
 
 ```powershell
-cd C:\Users\Administrator\Desktop\career-growth-analytics
+cd career-growth-analytics
 $env:PYTHONPATH = "src"
 .venv\Scripts\python.exe -m backend.scripts.init_db
 .venv\Scripts\uvicorn.exe backend.app.main:app --reload --port 8000
@@ -89,12 +89,14 @@ $env:PYTHONPATH = "src"
 启动前端：
 
 ```powershell
-cd C:\Users\Administrator\Desktop\career-growth-analytics\frontend
+cd career-growth-analytics\frontend
 npm install
 npm run dev
 ```
 
 访问地址：
+
+以下地址均为本地启动后的访问地址，`localhost` 表示当前评审机器，不代表云端部署。
 
 - 前端页面：http://localhost:5173
 - 后端文档：http://localhost:8000/docs

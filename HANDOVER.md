@@ -14,7 +14,7 @@
 ## 关键命令
 
 ```powershell
-cd C:\Users\Administrator\Desktop\career-growth-analytics
+cd career-growth-analytics
 $env:PYTHONPATH = "src"
 .venv\Scripts\python.exe -m pytest tests backend\tests -q
 .venv\Scripts\python.exe -m backend.scripts.init_db
@@ -22,7 +22,7 @@ $env:PYTHONPATH = "src"
 ```
 
 ```powershell
-cd C:\Users\Administrator\Desktop\career-growth-analytics\frontend
+cd career-growth-analytics\frontend
 npm install
 npm run dev
 npm run build

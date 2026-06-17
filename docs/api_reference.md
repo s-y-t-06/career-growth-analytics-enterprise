@@ -1,6 +1,6 @@
 # API 参考
 
-后端默认运行在 `http://localhost:8000`，交互式文档位于 `/docs`。
+后端默认运行在 `http://localhost:8000`，交互式文档位于 `/docs`。这里的 `localhost` 表示评审机器上的本地服务地址，不代表云端部署地址。
 
 ## GET /health
 
