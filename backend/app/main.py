@@ -19,7 +19,7 @@ from backend.app.routers import (
 
 
 def _database_is_empty() -> bool:
-    """Check whether the SQLite database has been seeded."""
+    """检查 SQLite 数据库是否已经写入演示数据。"""
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT COUNT(*) FROM users")
@@ -30,7 +30,7 @@ def _database_is_empty() -> bool:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """应用启动时初始化本地数据库，若为空则自动 seed。"""
+    """应用启动时初始化本地数据库，若为空则自动写入演示数据。"""
     init_database()
     if _database_is_empty():
         from backend.app.services.data_service import seed_database

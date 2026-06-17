@@ -10,8 +10,8 @@ Fix reviewer-facing reproducibility risks, documentation consistency, and a few 
 
 ## Repositories
 
-- MVP: `C:\Users\Administrator\Desktop\career-growth-analytics-mvp-export`
-- Enterprise: `C:\Users\Administrator\Desktop\career-growth-analytics`
+- MVP: `career-growth-analytics-mvp`
+- Enterprise: `career-growth-analytics-enterprise`
 
 ## Changes
 
@@ -82,7 +82,7 @@ Updated `docs/data_schema.md` in both repos based on real CSV headers:
 
 ### Cross-repo checks
 
-- Grep for `C:\Users\Administrator` in Markdown files: no matches in either repo.
+- Grep for local absolute paths in formal README/API/HANDOVER docs: no matches. Worklog paths have been normalized to repository names.
 - Temporary resources cleaned: `.pytest_cache`, `__pycache__`, `.ipynb_checkpoints`, `frontend/dist`, `data_test_*`, `data_tmp_*`.
 
 ## Commits

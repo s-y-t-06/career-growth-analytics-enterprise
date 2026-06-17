@@ -30,7 +30,7 @@ $env:PYTHONPATH = "src"
 说明：启动后端前必须先运行 `backend.scripts.init_db` 初始化本地 SQLite 数据库。数据库位于 `data/app/career_growth.db`，仅保存在评审机器本地，不是云端部署。FastAPI 启动时也会检测数据库是否为空，若为空会自动 seed。
 
 ```powershell
-cd career-growth-analytics\frontend
+cd career-growth-analytics-enterprise\frontend
 npm install
 npm run dev
 npm run build
