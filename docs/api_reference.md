@@ -1,202 +1,47 @@
-# API Reference
+# API 参考
 
-Base URL: `http://localhost:8000`
+后端默认运行在 `http://localhost:8000`，交互式文档位于 `/docs`。
 
-Interactive docs are available at `http://localhost:8000/docs`.
+## GET /health
 
-## Health
+返回服务健康状态。
 
-### GET /health
+## GET /overview
 
-Return backend, database, model, and metrics status.
+返回整体 KPI，包括用户数、事件数、流失率、D7 留存和模型核心指标。
 
-**Response**
+## GET /funnel
 
-```json
-{
-  "status": "ok",
-  "database": "ok",
-  "model": "ok",
-  "metrics": "ok"
-}
-```
+返回核心用户路径每一步的用户数、转化率和 drop-off。
 
-## Overview
+## GET /retention
 
-### GET /api/overview
+返回 cohort 留存矩阵，用于观察 D1、D7、D14 留存表现。
 
-Return platform and model overview.
+## GET /experiment
 
-**Response**
+返回 onboarding 实验结果，包括 variant 对比、激活指标和 SRM 检查。
 
-```json
-{
-  "users": 1000,
-  "events": 17856,
-  "churn_rate": 0.39,
-  "d1_retention": 0.674,
-  "d7_retention": 0.467,
-  "d14_retention": 0.079,
-  "selected_model": "logistic_regression",
-  "test_pr_auc": 0.5371,
-  "test_roc_auc": 0.6942,
-  "test_f1": 0.5884,
-  "test_brier": 0.2227
-}
-```
+## GET /model/metrics
 
-## Funnel
+返回模型选择结果、PR-AUC、ROC-AUC、Brier score、F1 和阈值。
 
-### GET /api/funnel
+## GET /model/risk-distribution
 
-Return the core user lifecycle funnel.
+返回预测风险分布，用于前端绘制风险直方图。
 
-**Response**
+## GET /model/subgroups
 
-```json
-{
-  "steps": [
-    {
-      "step": "signup",
-      "users": 1000,
-      "conversion_rate": 1.0,
-      "drop_off_rate": 0.0
-    }
-  ]
-}
-```
+返回按渠道、职业阶段等维度聚合的分群风险表现。
 
-## Retention
+## GET /users
 
-### GET /api/retention
+返回用户列表，支持前端展示用户概览。
 
-Return D1/D7/D14 retention and cohort retention.
+## GET /users/{user_id}
 
-**Response**
+返回单用户画像、事件时间线、风险因素和推荐动作。
 
-```json
-{
-  "d1_retention": 0.674,
-  "d7_retention": 0.467,
-  "d14_retention": 0.079,
-  "cohorts": [
-    {
-      "signup_week": "2026-02-23/2026-03-01",
-      "day": 1,
-      "users": 50,
-      "retained": 34,
-      "retention_rate": 0.68
-    }
-  ]
-}
-```
+## GET /nba/{user_id}
 
-## Experiment
-
-### GET /api/experiment
-
-Return onboarding A/B experiment analysis.
-
-**Response**
-
-```json
-{
-  "experiment_id": "exp_onboarding_v1",
-  "sample_sizes": {"control": 400, "personalized": 300, "simplified": 300},
-  "srm_chi2": 1.5,
-  "srm_p_value": 0.4726,
-  "metrics": {
-    "onboarding_completion_rate": [
-      {
-        "variant_id": "control",
-        "sample_size": 400,
-        "conversions": 200,
-        "conversion_rate": 0.5,
-        "absolute_lift": null,
-        "relative_lift": null,
-        "p_value": null,
-        "ci_lower": null,
-        "ci_upper": null
-      }
-    ]
-  }
-}
-```
-
-## Model
-
-### GET /api/model/metrics
-
-Return model metrics from artifacts.
-
-### GET /api/model/subgroups
-
-Return subgroup evaluation metrics.
-
-## Users
-
-### GET /api/users
-
-Return scored users with filters.
-
-**Query parameters**
-
-- `limit` (int, default 50)
-- `sort_by` (string, default `risk`)
-- `min_risk` (float, 0-1)
-- `acquisition_channel` (string)
-- `career_stage` (string)
-
-### GET /api/users/{user_id}
-
-Return detailed profile, risk, explanation, and timeline.
-
-### POST /api/users/score
-
-Score a single user.
-
-**Request**
-
-```json
-{"user_id": "u123"}
-```
-
-**Response**
-
-```json
-{
-  "user_id": "u123",
-  "churn_probability": 0.83,
-  "predicted_class": 1,
-  "recommended_action": "send_reengagement_message",
-  "channel": "email",
-  "reason": "high churn risk with marketing consent"
-}
-```
-
-## Next Best Action
-
-### GET /api/nba/examples
-
-Return example recommendations.
-
-### POST /api/nba/recommend
-
-Return a recommendation for a user.
-
-**Request**
-
-```json
-{"user_id": "u123"}
-```
-
-**Response**
-
-```json
-{
-  "user_id": "u123",
-  "action_name": "send_reengagement_message",
-  "channel": "email",
-  "reason": "high churn risk with marketing consent"
-}
-```
+返回指定用户的 Next Best Action。推荐结果基于预测风险和业务规则，不使用真实 churn label。

@@ -1,102 +1,46 @@
-# Enterprise Architecture
+# Enterprise 系统架构
 
-## Overview
+## 架构目标
 
-The Phase 3 Enterprise system turns the existing MVP analytics and churn prediction pipeline into a local, full-stack product. It exposes the data and model through a FastAPI backend, persists data in SQLite, and visualizes it through a React + Vite + TypeScript frontend.
+Enterprise 版本在 MVP 算法流程基础上增加本地可运行的前后端系统，使评审能够通过浏览器查看指标、图表和单用户推荐结果。
 
-## Components
+## 分层设计
 
 ```text
-career-growth-analytics/
-|-- backend/
-|   |-- app/
-|   |   |-- main.py                 # FastAPI app and router registration
-|   |   |-- config.py               # Paths and constants
-|   |   |-- database.py             # SQLite connection and schema creation
-|   |   |-- schemas.py              # Pydantic request/response models
-|   |   |-- services/               # Business logic
-|   |   |   |-- data_service.py     # CSV/artifact loading and DB seeding
-|   |   |   |-- analytics_service.py # Funnel, retention, experiment analytics
-|   |   |   |-- model_service.py    # Model scoring and explanations
-|   |   |   |-- nba_service.py      # Next Best Action service
-|   |   |-- routers/                # API endpoints
-|   |   |   |-- health.py
-|   |   |   |-- overview.py
-|   |   |   |-- funnel.py
-|   |   |   |-- retention.py
-|   |   |   |-- experiment.py
-|   |   |   |-- model.py
-|   |   |   |-- users.py
-|   |   |   |-- nba.py
-|   |-- scripts/
-|   |   |-- init_db.py              # Initialize and seed SQLite database
-|   |-- tests/                      # Backend pytest suite
-|-- frontend/                       # React + Vite + TypeScript
-|   |-- src/
-|   |   |-- api/                    # API client and TypeScript types
-|   |   |-- components/             # Layout, shared UI
-|   |   |-- pages/                  # Dashboard pages
-|   |   |-- App.tsx
-|   |   |-- main.tsx
-|   |-- package.json
-|-- data/app/
-|   |-- career_growth.db            # Local SQLite database
-|-- artifacts/                      # Existing model artifacts
+React Frontend
+    |
+FastAPI Routers
+    |
+Service Layer
+    |
+SQLite + CSV + Model Artifacts
+    |
+MVP Analytics Package
 ```
 
-## Data Flow
+## 后端
 
-1. The CSV sample data and artifacts are committed with the repository.
-2. `backend/scripts/init_db.py` reads the CSVs and writes them into `data/app/career_growth.db`.
-3. FastAPI routers load data either directly from CSVs/artifacts or from SQLite depending on the endpoint.
-4. The model service loads `artifacts/churn_model.joblib` once and scores users on demand.
-5. The frontend fetches JSON from the backend and renders charts and tables.
+FastAPI 后端负责暴露本地 API。路由层只处理请求和响应，核心计算放在 service 层，便于测试和维护。
 
-## Backend Services
+主要模块：
 
-### Data Service
+- `health`：健康检查。
+- `overview`：整体 KPI。
+- `funnel`：漏斗指标。
+- `retention`：cohort 留存。
+- `experiment`：A/B 实验分析。
+- `model`：模型指标和风险分布。
+- `users`：用户列表和详情。
+- `nba`：Next Best Action 推荐。
 
-- Loads `data/sample/*.csv` and `data/processed/labels.csv`.
-- Loads model artifacts from `artifacts/`.
-- Seeds SQLite tables: users, events, experiment_assignments, interventions, labels.
+## 数据层
 
-### Analytics Service
+SQLite 用于本地演示和查询。初始化脚本会读取样例 CSV 和模型 artifacts，构建本地数据库。项目没有引入 Redis、Kafka、Flink 或 PostgreSQL，因为当前本地评审场景不需要这些组件。
 
-- Reuses the existing `career_growth.analytics` modules.
-- Computes overview KPIs, funnel, retention, and experiment analysis.
+## 前端
 
-### Model Service
+前端使用 React + Vite + TypeScript，并通过 API client 调用 FastAPI。页面设计以评审快速理解为目标，覆盖 Overview、Funnel、Retention、Experiment、Churn Risk 和 User Detail。
 
-- Loads the fitted scikit-learn pipeline.
-- Rebuilds features with `career_growth.features.model_features.build_model_features`.
-- Returns predicted probabilities, predicted classes, and explanations.
-- Does not use the true `is_churned` label for recommendations.
+## 可复现性
 
-### NBA Service
-
-- Wraps `recommend_next_action` with the model score.
-- Generates Next Best Action recommendations from user state and churn probability.
-
-## Frontend Pages
-
-- **Overview**: KPI cards, system health, model performance.
-- **Funnel**: Bar chart and table of lifecycle conversion.
-- **Retention**: D1/D7/D14 cards and cohort table.
-- **Experiment**: Variant comparison and SRM status.
-- **Churn Risk**: Risk distribution, subgroup metrics, high-risk user table.
-- **User Detail**: Profile, prediction, explanation, event timeline.
-
-## Design Decisions
-
-- **SQLite**: Chosen to keep the system local and dependency-free. No Postgres, Redis, or Kafka.
-- **FastAPI**: Lightweight, auto-generates OpenAPI docs at `/docs`.
-- **React + Vite + TypeScript**: Fast dev server, type safety, simple build.
-- **Recharts**: Lightweight charting library for funnel and risk distribution.
-- **No hardcoded demo data**: All UI values come from the backend API.
-
-## Limitations
-
-- The system runs locally only.
-- Data is synthetic.
-- Model explanations are associations, not causal effects.
-- No authentication or authorization.
+所有数据均可由脚本重新生成，模型训练和后端数据库初始化都有明确命令。系统不依赖云端服务。

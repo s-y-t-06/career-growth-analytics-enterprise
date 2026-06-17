@@ -1,35 +1,25 @@
-# Career Growth Analytics
+# 职业成长分析与实验优化系统
 
-AI Career Platform Lifecycle Growth and Experimentation System -- MVP.
+本仓库是 Deepmanifold Take-home Challenge 的 Enterprise-level 版本，基于一个 AI 职业规划与岗位推荐产品，构建本地可运行的增长分析系统。系统包含 MVP 数据科学流程、流失预测模型、FastAPI 后端、SQLite 数据层和 React 前端，用于展示从数据生成到业务看板的完整闭环。
 
-This repository contains the minimum viable product for analyzing user lifecycle growth in an AI-powered career planning and job recommendation product. It generates a realistic synthetic event stream, validates data quality, computes growth funnels and cohort retention, analyzes an onboarding A/B experiment, and produces rule-based Next Best Action recommendations.
+## 项目范围
 
-## Project Scope
+- 模拟用户、事件、实验分组和干预记录。
+- 校验数据质量并计算增长漏斗、cohort 留存和 A/B 实验指标。
+- 构造无标签泄漏的流失预测特征。
+- 训练并评估 Logistic Regression 与 HistGradientBoostingClassifier。
+- 输出模型指标、分群风险和 Next Best Action 推荐。
+- 提供 FastAPI API，供前端页面调用。
+- 使用 SQLite 作为本地数据层，便于评审一键初始化。
+- 使用 React + Vite + TypeScript + Recharts 构建可交互看板。
 
-The MVP focuses on the core data and analytics pipeline:
+## 业务背景
 
-- Synthetic user and event data generation.
-- Data schema validation and quality checks.
-- Growth funnel analysis.
-- Cohort retention analysis.
-- A/B experiment analysis with sample ratio mismatch detection.
-- Churn label construction without data leakage.
-- Rule-based Next Best Action engine.
-- Churn prediction model training and evaluation (Phase 2).
-- Automated tests.
-- End-to-end Jupyter notebooks.
+模拟产品服务大学生和早期职业用户，帮助他们完成职业探索、简历上传、岗位推荐、成长任务和职业报告生成。系统目标是帮助增长团队理解用户生命周期表现，发现激活漏斗流失点，评估 onboarding 实验效果，识别高流失风险用户，并给出下一步干预建议。
 
-Model training is now included as Phase 2: a reproducible churn prediction pipeline with feature engineering, chronological train/validation/test splits, model selection, and evaluation.
+核心路径：
 
-Phase 3 adds an Enterprise-level local full-stack system: a FastAPI backend, SQLite data layer, and React + Vite + TypeScript frontend for interactive product analytics.
-
-## Business Context
-
-The simulated product helps university students and early-career professionals explore career paths, upload resumes, receive job recommendations, complete growth tasks, and generate career reports. The growth platform measures and optimizes the user journey from signup through activation and retention.
-
-Core user journey:
-
-```
+```text
 signup
 -> onboarding_complete
 -> profile_complete
@@ -41,187 +31,62 @@ signup
 -> retained / churned
 ```
 
-## Repository Structure
+## 目录结构
 
-```
+```text
 career-growth-analytics/
-|-- backend/                   # FastAPI enterprise backend
-|   |-- app/                   # Application code
-|   |   |-- main.py            # FastAPI entry point
-|   |   |-- routers/           # API endpoints
-|   |   |-- services/          # Business logic
-|   |   |-- database.py        # SQLite utilities
-|   |   |-- schemas.py         # Pydantic models
-|   |-- scripts/               # Backend CLI scripts
-|   |   |-- init_db.py         # Initialize SQLite database
-|   |-- tests/                 # Backend pytest suite
+|-- backend/                   # FastAPI 后端
+|   |-- app/
+|   |   |-- main.py            # API 入口
+|   |   |-- routers/           # 路由层
+|   |   |-- services/          # 业务服务层
+|   |   |-- database.py        # SQLite 工具
+|   |   `-- schemas.py         # Pydantic schema
+|   |-- scripts/init_db.py     # 初始化本地数据库
+|   `-- tests/                 # 后端测试
 |-- data/
-|   |-- sample/                # Generated CSV files (users, events, experiments, interventions)
-|   |-- processed/             # Derived outputs such as labels
-|   |-- app/                   # Local SQLite database
-|   |-- training/              # Local 5,000-user training data (ignored by git)
-|-- docs/
-|   |-- data_schema.md         # Full data schema
-|   |-- methodology.md         # Generation and label methodology
-|   |-- model_card.md          # Model card
-|   |-- enterprise_architecture.md  # Enterprise system architecture
-|   |-- api_reference.md       # API reference
-|-- frontend/                  # React + Vite + TypeScript frontend
-|   |-- src/
-|   |   |-- api/               # API client and types
-|   |   |-- components/        # Shared UI components
-|   |   |-- pages/             # Dashboard pages
-|   |   |-- App.tsx
-|   |   |-- main.tsx
-|   |-- package.json
-|-- notebooks/
-|   |-- lifecycle_analysis.ipynb   # End-to-end exploratory analysis
-|   |-- churn_modeling.ipynb       # Churn prediction modeling
-|-- scripts/
-|   |-- generate_data.py       # CLI to regenerate synthetic data
-|   |-- run_analysis.py        # CLI to run validation and analytics
-|   |-- compute_summary.py     # CLI to print a concise summary
-|   |-- build_notebook.py      # CLI to execute the notebook from the command line
-|   |-- train_churn_model.py   # CLI to train churn models
-|-- src/career_growth/         # Original MVP analytics package
-|-- tests/                     # Original pytest suite
+|   |-- sample/                # 样例 CSV 数据
+|   |-- processed/             # 标签等派生结果
+|   |-- app/                   # 本地 SQLite 数据库
+|   `-- training/              # 本地训练数据，已 git ignore
+|-- docs/                      # 架构、API、方法和模型说明
+|-- frontend/                  # React 前端
+|-- notebooks/                 # MVP 和建模 Notebook
+|-- scripts/                   # 数据生成、分析和训练脚本
+|-- src/career_growth/         # MVP 核心分析包
+|-- tests/                     # MVP 测试
 |-- pyproject.toml
 |-- README.md
-|-- LICENSE
+`-- LICENSE
 ```
 
-## Technology Stack
+## 技术栈
 
 - Python 3.10+
-- pandas, numpy, scikit-learn, scipy
-- matplotlib / seaborn
-- pydantic
-- pytest
-- Jupyter
-- FastAPI, uvicorn
-- SQLite
-- React, Vite, TypeScript
-- Recharts, lucide-react
+- pandas、numpy、scikit-learn、scipy
+- FastAPI、Pydantic、SQLite
+- pytest、Jupyter
+- React、Vite、TypeScript、Recharts
 
-No external APIs, payment gateways, or cloud services are used. All data is generated locally.
+## 本地启动
 
-## Installation
-
-Create and activate a virtual environment in the repository root using a real CPython interpreter (not a Windows Store alias), then install the package in editable mode.
-
-On Windows, use the `py` launcher with CPython 3.11 preinstalled:
+安装 Python 依赖：
 
 ```powershell
-py -3.11 -m venv .venv
-.venv\Scripts\activate
+cd C:\Users\Administrator\Desktop\career-growth-analytics
 .venv\Scripts\python.exe -m pip install -e ".[dev]"
 ```
 
-On macOS or Linux:
-
-```bash
-/path/to/real/python -m venv .venv
-source .venv/bin/activate
-.venv/bin/python -m pip install -e ".[dev]"
-```
-
-The `.venv/` directory is ignored by Git (see `.gitignore`). Using the virtual environment's interpreter avoids relying on the Windows Store Python shim, which cannot be invoked by absolute path in a fresh terminal.
-
-Verified base interpreter for this repository (CPython 3.11.15 installed via `uv`):
-
-```text
-C:\Users\Administrator\AppData\Roaming\uv\python\cpython-3.11.15-windows-x86_64-none\python.exe
-```
-
-## Generate Data
-
-The repository includes a small sample dataset (1,000 users) under `data/sample/`. To regenerate it, or to generate a larger dataset locally, run:
-
-```powershell
-# Regenerate the sample dataset
-$env:PYTHONPATH = "src"
-.venv\Scripts\python.exe scripts/generate_data.py --count 1000 --seed 42
-
-# Generate the full 5,000-user dataset used for stable analytics
-.venv\Scripts\python.exe scripts/generate_data.py --count 5000 --seed 42
-```
-
-Generated files:
-
-- `data/sample/users.csv`
-- `data/sample/events.csv`
-- `data/sample/experiment_assignments.csv`
-- `data/sample/interventions.csv`
-- `data/processed/labels.csv`
-
-## Run Analytics
-
-After generating data, run the full analytics pipeline from the project root:
-
-```powershell
-$env:PYTHONPATH = "src"
-.venv\Scripts\python.exe scripts/run_analysis.py
-```
-
-This executes validation, funnel, retention, cohort, experiment, and Next Best Action analysis.
-
-## Train Churn Model
-
-Train and evaluate churn prediction models on the full 5,000-user dataset:
-
-```powershell
-$env:PYTHONPATH = "src"
-.venv\Scripts\python.exe scripts/train_churn_model.py --count 5000 --seed 42
-```
-
-This script:
-
-- Generates synthetic data into a dedicated training directory (`data/training/` by default) so that the committed 1,000-user sample data under `data/sample/` is never overwritten.
-- Builds pre-cutoff features and attaches churn labels.
-- Saves the engineered feature matrix to `data/training/processed/model_features.csv`.
-- Splits users chronologically into train/validation/test sets.
-- Trains a Logistic Regression baseline and a HistGradientBoostingClassifier.
-- Selects the best model by validation PR-AUC.
-- Chooses an operating threshold on the validation set (F1 by default; Youden index also supported).
-- Evaluates the selected model exactly once on the test set, including Brier score and confusion matrix.
-- Outputs subgroup metrics by `acquisition_channel`, `career_stage`, and `device_type`.
-- Produces global and user-level explanations, plus Next Best Action examples.
-- Saves the model, metadata, metrics, feature schema, explainability artifacts, subgroup metrics, NBA examples, and plots under `artifacts/`.
-
-To use existing data instead of regenerating it, add `--use-existing-data`.
-
-## Model Artifacts
-
-Formal artifacts under `artifacts/` are committed as deliverables. Key files include:
-
-- `artifacts/churn_model.joblib` -- selected, fitted model
-- `artifacts/model_metadata.json` -- model name, version, training timestamp, cutoff/window days, feature columns, threshold, split time ranges, sizes, churn rates, library versions
-- `artifacts/metrics.json` -- candidate validation metrics, selected model, threshold, validation metrics, test metrics, confusion matrix
-- `artifacts/feature_schema.json` -- separated categorical and numeric feature lists
-- `artifacts/explainability.json` -- top coefficients, permutation importance, user explanations
-- `artifacts/user_explanations.json` -- at least 3 user-level explanations
-- `artifacts/subgroup_metrics.csv` / `subgroup_metrics.json` -- subgroup evaluation
-- `artifacts/nba_examples.csv` / `nba_examples.json` -- Next Best Action examples
-- `artifacts/plots/*.png` -- PR, ROC, calibration, confusion matrix, risk distribution, and feature importance plots
-
-## Run Enterprise Application
-
-### Initialize database
+初始化后端数据库并启动 API：
 
 ```powershell
 cd C:\Users\Administrator\Desktop\career-growth-analytics
 $env:PYTHONPATH = "src"
 .venv\Scripts\python.exe -m backend.scripts.init_db
-```
-
-### Start backend
-
-```powershell
-$env:PYTHONPATH = "src"
 .venv\Scripts\uvicorn.exe backend.app.main:app --reload --port 8000
 ```
 
-### Start frontend
+启动前端：
 
 ```powershell
 cd C:\Users\Administrator\Desktop\career-growth-analytics\frontend
@@ -229,68 +94,42 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173 in a browser.
+访问地址：
 
-## Run Tests
+- 前端页面：http://localhost:5173
+- 后端文档：http://localhost:8000/docs
+- 健康检查：http://localhost:8000/health
 
-```powershell
-$env:PYTHONPATH = "src;backend"
-.venv\Scripts\python.exe -m pytest tests backend/tests -q
-```
+## 主要页面
 
-## Build Frontend
+- Overview：展示用户量、事件量、流失率、D7 留存和模型指标。
+- Funnel：展示核心激活漏斗和每一步 drop-off。
+- Retention：展示 cohort 留存矩阵。
+- Experiment：展示 onboarding A/B 实验结果和 SRM 检查。
+- Churn Risk：展示模型指标、风险分布和分群风险。
+- User Detail：展示单用户画像、风险因素和 Next Best Action。
 
-```powershell
-cd C:\Users\Administrator\Desktop\career-growth-analytics\frontend
-npm run build
-```
-
-## Frontend Pages
-
-- **Overview Dashboard**: KPI cards for platform and model metrics, system health indicator, "What to watch" guidance, and a suggested demo flow.
-- **Funnel**: Bar chart and funnel table with drop-off highlighting and a data-driven business insight.
-- **Retention**: D1/D7/D14 KPI cards and a color-coded cohort retention pivot table.
-- **Experiment**: Onboarding A/B test summary, sample ratio mismatch status, and grouped variant comparison tables.
-- **Churn Risk**: Model performance KPIs, risk distribution chart, subgroup evaluation table, filters, and a high-risk user table.
-- **User Detail**: User profile, churn probability, predicted class, top risk factors, Next Best Action recommendation, and early event timeline.
-
-## Open Notebook
-
-```powershell
-.venv\Scripts\jupyter.exe notebook notebooks/lifecycle_analysis.ipynb
-```
-
-To execute the notebook non-interactively:
+## 验证命令
 
 ```powershell
 $env:PYTHONPATH = "src"
-.venv\Scripts\python.exe scripts/build_notebook.py
-.venv\Scripts\python.exe -m nbconvert --execute --to notebook --inplace notebooks/lifecycle_analysis.ipynb
+.venv\Scripts\python.exe -m pytest tests backend\tests -q
+cd frontend
+npm run build
 ```
 
-## Churn Label Definition
+## 模型结果
 
-- Prediction cutoff: signup timestamp + 7 days.
-- Label window: day 8 through day 21 after signup.
-- `is_churned = 1` if the user has no `event_source == "user_action"` events in the label window.
-- Only users with a complete 21-day observation window are included.
+5,000 用户训练数据上的最终模型为 Logistic Regression：
 
-## A/B Experiment
+| 指标 | Test Set |
+| --- | ---: |
+| PR-AUC | 0.5371 |
+| ROC-AUC | 0.6942 |
+| Brier Score | 0.2227 |
+| F1 | 0.5884 |
+| Threshold | 0.41 |
 
-`exp_onboarding_v1` compares three onboarding flows:
+## 工程说明
 
-- `control` -- standard five-step onboarding (40%)
-- `personalized` -- adaptive onboarding (30%)
-- `simplified` -- two-step onboarding (30%)
-
-Primary metrics: onboarding completion rate, profile completion rate, D7 retention rate.
-
-The treatment effects are injected into the synthetic data through a causal mechanism: the onboarding variants directly influence onboarding completion (and the preceding onboarding start), and any downstream lift in profile completion, resume upload, or retention emerges from the resulting user state and funnel progression. This is a synthetic demonstration, not a claim about real product performance.
-
-## Design Decisions
-
-See `docs/methodology.md` for the full generative causal order, probability formulas, treatment effect injection, noise and anomaly injection, and leakage protection rules.
-
-## License
-
-MIT License -- see `LICENSE`.
+本项目不使用云端部署。数据由本地脚本生成，SQLite 由初始化脚本构建，前后端均可在本地运行。Kafka、Redis、PostgreSQL、Flink 等组件没有被强行加入，因为当前业务展示不需要这些复杂依赖。

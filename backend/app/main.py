@@ -1,4 +1,4 @@
-"""FastAPI application entry point."""
+"""FastAPI 应用入口。"""
 
 from contextlib import asynccontextmanager
 
@@ -20,7 +20,7 @@ from backend.app.routers import (
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Initialize the application database on startup."""
+    """应用启动时初始化本地数据库。"""
     init_database()
     yield
 
@@ -52,7 +52,7 @@ app.include_router(nba.router)
 
 @app.get("/")
 def root() -> dict:
-    """Root endpoint with API information."""
+    """返回 API 基础信息的根接口。"""
     return {
         "name": "Career Growth Analytics Enterprise API",
         "version": "0.3.0",
