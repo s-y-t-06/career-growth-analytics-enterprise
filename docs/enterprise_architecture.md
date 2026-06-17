@@ -35,7 +35,7 @@ FastAPI 后端负责暴露本地 API。路由层只处理请求和响应，核�
 
 ## 数据层
 
-SQLite 用于本地演示和查询。初始化脚本会读取样例 CSV 和模型 artifacts，构建本地数据库。项目没有引入 Redis、Kafka、Flink 或 PostgreSQL，因为当前本地评审场景不需要这些组件。
+SQLite 用于本地演示和查询。初始化脚本会读取样例 CSV 和模型 artifacts，构建本地数据库。当前 API 计算层仍主要复用 CSV 与模型 artifacts，以保持 MVP 分析流程和 Enterprise 展示层一致；SQLite 在本版本中承担本地初始化、演示查询和后续扩展的 materialized store 角色。生产化时应将用户风险、NBA 结果和核心聚合指标统一写入数据库或特征存储，由 API 分页查询预计算结果。项目没有引入 Redis、Kafka、Flink 或 PostgreSQL，因为当前本地评审场景不需要这些组件。
 
 ## 前端
 

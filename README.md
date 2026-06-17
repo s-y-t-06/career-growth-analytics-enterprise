@@ -126,6 +126,8 @@ npm run dev
 
 ## 测试
 
+如果只想快速验收项目是否能跑，请优先执行 smoke test；full test 覆盖更完整，但通常需要 8-10 分钟。
+
 ### Smoke test（快速验证）
 
 用于评审快速确认后端 API 和核心服务能跑。主要覆盖 health、overview、funnel、retention、experiment、model、users 和 NBA 接口，通常在 2-3 分钟内完成。
