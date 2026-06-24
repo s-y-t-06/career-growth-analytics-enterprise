@@ -231,7 +231,7 @@ export default function ChurnRisk() {
                   <td>{user.recommended_action}</td>
                   <td>{user.channel}</td>
                   <td>
-                    <Link to={`/users/${user.user_id}`} className="button">
+                    <Link to={`/users/${user.user_id}`} className="button detail-link-button">
                       Details
                     </Link>
                   </td>
